@@ -2,7 +2,7 @@ name: cards
 version: 0.1.0
 
 authors:
-  - your-name-here <your-email-here>
+  - Matt Swieboda <mswieboda@users.noreply.github.com>
 
 targets:
   cards:
@@ -11,3 +11,8 @@ targets:
 crystal: 0.35.1
 
 license: MIT
+
+dependencies:
+  game:
+    github: mswieboda/game
+    version: 0.2.7
