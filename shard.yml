@@ -1,0 +1,13 @@
+name: cards
+version: 0.1.0
+
+authors:
+  - your-name-here <your-email-here>
+
+targets:
+  cards:
+    main: src/cards.cr
+
+crystal: 0.35.1
+
+license: MIT
