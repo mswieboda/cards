@@ -1,27 +1,16 @@
 # cards
 
-TODO: Write a description here
-
 ## Installation
 
-TODO: Write installation instructions here
+- clone repo
+- install crystal specified in `.tool-versions` (on macOS via [asdf](https://github.com/asdf-vm/asdf), or [other instructions](https://crystal-lang.org/install/))
+- install shards `shards install`
+- make sure to have `make` installed on your OS
 
 ## Usage
 
-TODO: Write usage instructions here
+run using `Makefile`, by default cleans the build and complies a new one, see more options in `Makefile`
 
-## Development
-
-TODO: Write development instructions here
-
-## Contributing
-
-1. Fork it (<https://github.com/your-github-user/cards/fork>)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
-
-## Contributors
-
-- [your-name-here](https://github.com/your-github-user) - creator and maintainer
+```
+make
+```
