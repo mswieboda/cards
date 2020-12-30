@@ -3,7 +3,19 @@
 ## Installation
 
 - clone repo
-- install crystal specified in `.tool-versions` (on macOS via [asdf](https://github.com/asdf-vm/asdf), or [other instructions](https://crystal-lang.org/install/))
+```
+git clone git@github.com:mswieboda/cards.git
+```
+- cd into dir
+```
+cd cards
+```
+- install crystal specified in `.tool-versions`
+on macOS with [asdf](https://github.com/asdf-vm/asdf):
+```
+asdf install `cat .tool-versions`
+```
+or [other OS's and instructions](https://crystal-lang.org/install/)
 - install shards `shards install`
 - make sure to have `make` installed on your OS
 
