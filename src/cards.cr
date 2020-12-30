@@ -1,6 +1,11 @@
-# TODO: Write documentation for `Cards`
-module Cards
-  VERSION = "0.1.0"
+require "game"
 
-  # TODO: Put your code here
+require "./cards/**"
+
+module Cards
+  def self.run
+    Main.new.run
+  end
 end
+
+Cards.run
