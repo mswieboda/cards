@@ -33,6 +33,8 @@ module Cards
         return
       end
 
+      @game.update(frame_time)
+
       if @game.game_over?
         @menu.show
       end
