@@ -1,5 +1,3 @@
-require "./game_mode"
-
 module Cards
   class Card
     property rank : Rank

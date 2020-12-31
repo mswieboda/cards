@@ -2,22 +2,17 @@ require "./game_mode"
 
 module Cards
   class Blackjack < GameMode
-    @cards : Array(Card)
-
     MARGIN = 10
 
     def initialize
       super
 
-      @cards = [] of Card
-      @cards << Card.new(rank: Rank::Ace, suit: Suit::Spades)
-      @cards << Card.new(rank: Rank::King, suit: Suit::Clubs)
-      @cards << Card.new(rank: Rank::Three, suit: Suit::Hearts)
+      @deck = StandardDeck.new
     end
 
     def update(frame_time)
       if Game::Key::Space.pressed?
-        @cards.each(&.flip)
+        @deck.cards.each(&.flip)
       end
     end
 
@@ -31,10 +26,15 @@ module Cards
       x = MARGIN
       y = MARGIN
 
-      @cards.each_with_index do |card, index|
+      @deck.cards.each_with_index do |card, index|
         card.draw(screen_x: x, screen_y: y)
 
         x += card.width + MARGIN
+
+        if x + card.width + MARGIN > Main.screen_width
+          x = MARGIN
+          y += MARGIN + card.height
+        end
       end
     end
   end
