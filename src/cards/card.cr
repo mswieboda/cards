@@ -75,6 +75,14 @@ module Cards
     end
 
     def draw_suit_rank(screen_x, screen_y)
+      suit.sprite.draw(
+        x: screen_x,
+        y: screen_y,
+        width: 64,
+        height: 64,
+        rotation: 0
+      )
+
       text = Game::Text.new(
         text: short_name,
         size: TEXT_SIZE,

@@ -5,6 +5,25 @@ module Cards
     Hearts
     Spades
 
+    def sprite_sym
+      case self
+      when Diamonds
+        :diamonds
+      when Clubs
+        :clubs
+      when Hearts
+        :hearts
+      when Spades
+        :spades
+      else
+        raise "Suit#sprite_sym error suit not found: #{self}"
+      end
+    end
+
+    def sprite
+      Game::Sprite.get(sprite_sym)
+    end
+
     def name
       to_s
     end
