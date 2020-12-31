@@ -1,8 +1,9 @@
 module Cards
   abstract class Deck
+    property back : CardBack
     property cards : Array(Card)
 
-    def initialize(@cards = [] of Card)
+    def initialize(@back = CardBacks::Bordered.new, @cards = [] of Card)
     end
 
     def draw(screen_x, screen_y)

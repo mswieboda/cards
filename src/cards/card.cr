@@ -1,5 +1,6 @@
 module Cards
   class Card
+    property deck : Deck
     property rank : Rank
     property suit : Suit
     property? flipped
@@ -10,7 +11,7 @@ module Cards
 
     TEXT_SIZE = 16
 
-    def initialize(@rank, @suit, @flipped = false)
+    def initialize(@deck, @rank, @suit, @flipped = false)
     end
 
     # methods for width/height in case of changing to instance vars later
@@ -41,13 +42,12 @@ module Cards
     def draw(screen_x, screen_y)
       if flipped?
         # draw back
-        Game::Rectangle.new(
-          x: screen_x,
-          y: screen_y,
+        @deck.back.draw(
+          screen_x: screen_x,
+          screen_y: screen_y,
           width: width,
-          height: height,
-          color: Game::Color::Black
-        ).draw
+          height: height
+        )
 
         return
       end
