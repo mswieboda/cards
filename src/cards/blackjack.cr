@@ -12,6 +12,7 @@ module Cards
 
     def update(frame_time)
       if Game::Key::Space.pressed?
+        @deck.shuffle!
         @deck.cards.each(&.flip)
       end
     end

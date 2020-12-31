@@ -11,5 +11,9 @@ module Cards
 
       # TODO: draw shadow bottom/right to show depth?
     end
+
+    def shuffle!
+      @cards.shuffle!
+    end
   end
 end
