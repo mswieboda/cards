@@ -7,7 +7,7 @@ module Cards
     def initialize
       super
 
-      @deck = StandardDeck.new
+      @deck = StandardDeck.new(jokers: true)
     end
 
     def update(frame_time)
