@@ -31,8 +31,19 @@ make sure to have `make` installed on your OS
 
 ## Usage
 
-run using `Makefile`, by default cleans the build and complies a new one, see more options in `Makefile`
+### Run
+run using `Makefile`
+
+by default cleans the build and complies a new one, see more options in `Makefile`
 
 ```
 make
 ```
+
+### Package
+package to macOS app (requires [platypus](https://sveinbjorn.org/platypus))
+```
+make pack
+```
+
+this will open Platypus with the default config from `cards.platypus`

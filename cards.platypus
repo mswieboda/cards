@@ -31,7 +31,7 @@
 	<key>ExecutablePath</key>
 	<string>/usr/local/share/platypus/ScriptExec</string>
 	<key>IconPath</key>
-	<string>/Users/matt/Library/Application Support/Platypus/PlatypusIcon-9708.icns</string>
+	<string>/Applications/Platypus.app/Contents/Resources/PlatypusDefault.icns</string>
 	<key>Identifier</key>
 	<string>org.mswieboda.cards</string>
 	<key>InterfaceType</key>
