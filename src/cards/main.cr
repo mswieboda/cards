@@ -3,7 +3,7 @@ module Cards
     DEBUG = false
     TARGET_FPS = 60
 
-    # @game : Cards::Game
+    @game : GameMode
 
     def initialize
       super(
@@ -17,7 +17,7 @@ module Cards
       )
 
       @menu = MainMenu.new
-      # @game = BlackJack.new
+      @game = Blackjack.new
 
       @menu.show
     end
@@ -33,9 +33,9 @@ module Cards
         return
       end
 
-      # if @game.game_over?
-      #   @menu.show
-      # end
+      if @game.game_over?
+        @menu.show
+      end
     end
 
     def draw
@@ -44,11 +44,11 @@ module Cards
         return
       end
 
-      # @game.draw
+      @game.draw
     end
 
     def close?
-      @menu.exit? #|| @game.exit?
+      @menu.exit? || @game.exit?
     end
   end
 end
