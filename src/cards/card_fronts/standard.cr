@@ -10,7 +10,7 @@ module Cards::CardFronts
       Suit.each do |suit|
         @@sprites["heading_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(10, 10)
         @@sprites["ace_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
-        @@sprites["numeral_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(16, 16)
+        @@sprites["numeral_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(14, 14)
       end
     end
 
@@ -79,6 +79,7 @@ module Cards::CardFronts
     end
 
     def draw_rank(card : Card, screen_x, screen_y)
+      heading = 15
       spacing = 3
 
       case card.rank
@@ -98,15 +99,32 @@ module Cards::CardFronts
         y = screen_y + card.height - spacing - sprite.height
 
         sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
+      when .four?, .five?
+        spacing_h = 1
+        sprite = @@sprites["numeral_" + card.suit.to_s]
+        x = screen_x + heading + spacing_h + sprite.width / 2
+        y = screen_y + spacing + sprite.height
+        sprite.draw(x: x, y: y, centered: true)
 
-        if card.rank.three?
-          x = screen_x + card.width / 2
-          y = screen_y + card.height / 2
+        y = screen_y + card.height - spacing - sprite.height
+        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
 
-          sprite.draw(x: x, y: y, centered: true)
-        end
+        x = screen_x + card.width - heading - spacing_h - sprite.width / 2
+        y = screen_y + spacing + sprite.height
+        sprite.draw(x: x, y: y, centered: true)
+
+        y = screen_y + card.height - spacing - sprite.height
+        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
       else
         # raise "CardFronts::Standard#draw_rank error rank not found: #{card.rank}"
+      end
+
+      if card.rank.three? || card.rank.five?
+        sprite = @@sprites["numeral_" + card.suit.to_s]
+        x = screen_x + card.width / 2
+        y = screen_y + card.height / 2
+
+        sprite.draw(x: x, y: y, centered: true)
       end
     end
   end
