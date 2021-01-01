@@ -1,4 +1,4 @@
-require "./card_back"
+require "../card_back"
 
 module Cards::CardBacks
   class Bordered < CardBack

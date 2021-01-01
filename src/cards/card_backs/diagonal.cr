@@ -1,3 +1,5 @@
+require "../card_back"
+
 module Cards::CardBacks
   class Diagonal < CardBack
     SPACING = 10

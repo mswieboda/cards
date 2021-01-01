@@ -20,10 +20,6 @@ module Cards
       end
     end
 
-    def sprite
-      Game::Sprite.get(sprite_sym)
-    end
-
     def name
       to_s
     end

@@ -9,8 +9,6 @@ module Cards
     WIDTH = 63
     HEIGHT = 88
 
-    TEXT_SIZE = 16
-
     def initialize(@deck, @rank, @suit, @flipped = false)
     end
 
@@ -41,60 +39,19 @@ module Cards
 
     def draw(screen_x, screen_y)
       if flipped?
-        # draw back
         @deck.back.draw(
           screen_x: screen_x,
           screen_y: screen_y,
           width: width,
           height: height
         )
-
-        return
+      else
+        @deck.front.draw(
+          card: self,
+          screen_x: screen_x,
+          screen_y: screen_y
+        )
       end
-
-      # fill
-      Game::Rectangle.new(
-        x: screen_x,
-        y: screen_y,
-        width: width,
-        height: height,
-        color: Game::Color::Ivory
-      ).draw
-
-      draw_suit_rank(screen_x, screen_y)
-
-      # border
-      Game::Rectangle.new(
-        x: screen_x,
-        y: screen_y,
-        width: width,
-        height: height,
-        color: Game::Color::Black,
-        filled: false
-      ).draw
-    end
-
-    def draw_suit_rank(screen_x, screen_y)
-      suit.sprite.draw(
-        x: screen_x,
-        y: screen_y,
-        width: 64,
-        height: 64,
-        rotation: 0
-      )
-
-      text = Game::Text.new(
-        text: short_name,
-        size: TEXT_SIZE,
-        spacing: 5,
-        color: suit.color
-      )
-
-      # center horz/vert
-      text.x = screen_x + width / 2 - text.width / 2
-      text.y = screen_y + height / 2 - text.height / 2
-
-      text.draw
     end
   end
 end
