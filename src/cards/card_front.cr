@@ -8,7 +8,6 @@ module Cards
       when Rank::Ace
         draw_ace(card, screen_x, screen_y)
       else
-        draw_ace(card, screen_x, screen_y)
       end
 
       if Main::DEBUG

@@ -9,8 +9,8 @@ module Cards::CardFronts
     def initialize
       Suit.each do |suit|
         @@sprites["heading_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(10, 10)
-        @@sprites["numeral_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
-        @@sprites["ace_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(16, 16)
+        @@sprites["ace_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
+        @@sprites["numeral_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(16, 16)
       end
     end
 
@@ -79,7 +79,11 @@ module Cards::CardFronts
     end
 
     def draw_ace(card : Card, screen_x, screen_y)
-      # draw suit symbol
+      sprite = @@sprites["ace_" + card.suit.to_s]
+      x = screen_x + card.width / 2 - sprite.width / 2
+      y = screen_y + card.height / 2 - sprite.height / 2
+
+      sprite.draw(x: x, y: y)
     end
   end
 end
