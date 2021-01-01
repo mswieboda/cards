@@ -31,7 +31,7 @@ module Cards::CardFronts
       end
 
       # draw label
-      spacing = 5
+      spacing = 3
       x = screen_x + spacing
       y = screen_y + spacing
       sprite = @@sprites["heading_" + card.suit.to_s]
@@ -57,7 +57,7 @@ module Cards::CardFronts
     end
 
     def draw_joker_heading(card : Card, screen_x, screen_y)
-      spacing = 5
+      spacing = 3
       x = screen_x + spacing
       y = screen_y + spacing
 
@@ -79,8 +79,8 @@ module Cards::CardFronts
     end
 
     def draw_rank(card : Card, screen_x, screen_y)
-      heading = 15
-      spacing = 3
+      heading = 13
+      spacing = 5
 
       case card.rank
       when .ace?
