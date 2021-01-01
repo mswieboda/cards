@@ -78,12 +78,24 @@ module Cards::CardFronts
       end
     end
 
-    def draw_ace(card : Card, screen_x, screen_y)
-      sprite = @@sprites["ace_" + card.suit.to_s]
-      x = screen_x + card.width / 2 - sprite.width / 2
-      y = screen_y + card.height / 2 - sprite.height / 2
+    def draw_rank(card : Card, screen_x, screen_y)
+      case card.rank
+      when .ace?
+        sprite = @@sprites["ace_" + card.suit.to_s]
+        x = screen_x + card.width / 2 - sprite.width / 2
+        y = screen_y + card.height / 2 - sprite.height / 2
 
-      sprite.draw(x: x, y: y)
+        sprite.draw(x: x, y: y)
+      when .two?
+        sprite = @@sprites["numeral_" + card.suit.to_s]
+        spacing = 10
+        x = screen_x + card.width / 2 - sprite.width / 2
+        y = screen_y + spacing
+
+        sprite.draw(x: x, y: y)
+      else
+        # raise "CardFronts::Standard#draw_rank error rank not found: #{card.rank}"
+      end
     end
   end
 end

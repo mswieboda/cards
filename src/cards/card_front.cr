@@ -3,12 +3,7 @@ module Cards
     def draw(card : Card, screen_x, screen_y)
       draw_back(card, screen_x, screen_y)
       draw_heading(card, screen_x, screen_y)
-
-      case card.rank
-      when Rank::Ace
-        draw_ace(card, screen_x, screen_y)
-      else
-      end
+      draw_rank(card, screen_x, screen_y)
 
       if Main::DEBUG
         text = Game::Text.new(
