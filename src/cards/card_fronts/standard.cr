@@ -79,6 +79,8 @@ module Cards::CardFronts
     end
 
     def draw_rank(card : Card, screen_x, screen_y)
+      spacing = 3
+
       case card.rank
       when .ace?
         sprite = @@sprites["ace_" + card.suit.to_s]
@@ -86,13 +88,23 @@ module Cards::CardFronts
         y = screen_y + card.height / 2 - sprite.height / 2
 
         sprite.draw(x: x, y: y)
-      when .two?
+      when .two?, .three?
         sprite = @@sprites["numeral_" + card.suit.to_s]
-        spacing = 10
-        x = screen_x + card.width / 2 - sprite.width / 2
-        y = screen_y + spacing
+        x = screen_x + card.width / 2
+        y = screen_y + spacing + sprite.height
 
-        sprite.draw(x: x, y: y)
+        sprite.draw(x: x, y: y, centered: true)
+
+        y = screen_y + card.height - spacing - sprite.height
+
+        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
+
+        if card.rank.three?
+          x = screen_x + card.width / 2
+          y = screen_y + card.height / 2
+
+          sprite.draw(x: x, y: y, centered: true)
+        end
       else
         # raise "CardFronts::Standard#draw_rank error rank not found: #{card.rank}"
       end
