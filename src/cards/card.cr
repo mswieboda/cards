@@ -45,8 +45,6 @@ module Cards
         mouse_x = Game::Mouse.x
         mouse_y = Game::Mouse.y
 
-        puts ">>> mouse pressed"
-
         if mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height
           @selected = true
         else
