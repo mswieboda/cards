@@ -5,12 +5,29 @@ module Cards::CardFronts
     SPACING = 10
 
     @@sprites = {} of String => Game::Sprite
+    @@headings = {} of String => Hash(String, Game::Texture)
 
     def initialize
       Suit.each do |suit|
         @@sprites["heading_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(10, 10)
         @@sprites["ace_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
         @@sprites["numeral_" + suit.to_s] = Game::Sprite.get(suit.sprite_sym).resize(14, 14)
+
+        @@headings[suit.to_s] = {} of String => Game::Texture
+
+        Rank.each do |rank|
+          label = Game::Image.from_text(
+            text: rank.short_name,
+            font_size: 10,
+            spacing: 2,
+            color: suit.color
+          )
+          label.flip_horizontal!
+          label.flip_vertical!
+          texture_label = Game::Texture.load(label)
+
+          @@headings[suit.to_s][rank.to_s] = texture_label
+        end
       end
     end
 
@@ -51,9 +68,23 @@ module Cards::CardFronts
       text.draw
 
       # draw suit
-      y += text.height + 2
+      x += sprite.width / 2
+      y += text.height + sprite.height / 2
 
-      sprite.draw(x: x, y: y)
+      sprite.draw(x: x, y: y, centered: true)
+
+      # draw label, flipped
+      label = @@headings[card.suit.to_s][card.rank.to_s]
+      x = screen_x + card.width - spacing - label.width - ((sprite.width - label.width) / 2).to_i
+      y = screen_y + card.height - spacing - label.height
+
+      label.draw(x: x, y: y)
+
+      # draw suit, flipped
+      x = screen_x + card.width - spacing - sprite.width / 2
+      y -= sprite.height / 2
+
+      sprite.draw(x: x, y: y, rotation: 180, centered: true)
     end
 
     def draw_joker_heading(card : Card, screen_x, screen_y)
