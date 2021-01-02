@@ -2,15 +2,13 @@ require "../card_back"
 
 module Cards::CardBacks
   class Diagonal < CardBack
-    SPACING = 10
-
-    def draw(screen_x, screen_y, width, height)
-      # inner fill
-      Game::Rectangle.new(
+    def draw_design(screen_x, screen_y, width, height)
+      Game::RoundedRectangle.new(
         x: screen_x,
         y: screen_y,
         width: width,
         height: height,
+        roundness: 0.15_f32,
         color: alt_color
       ).draw
     end

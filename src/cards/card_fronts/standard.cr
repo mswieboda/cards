@@ -31,16 +31,6 @@ module Cards::CardFronts
       end
     end
 
-    def draw_back(card : Card, screen_x, screen_y)
-      Game::Rectangle.new(
-        x: screen_x,
-        y: screen_y,
-        width: card.width,
-        height: card.height,
-        color: Game::Color::Ivory
-      ).draw
-    end
-
     def draw_heading(card : Card, screen_x, screen_y)
       if card.rank.joker?
         draw_joker_heading(card, screen_x, screen_y)
@@ -59,8 +49,6 @@ module Cards::CardFronts
         spacing: 2,
         color: card.suit.color
       )
-
-      # puts ">>> text: #{card.rank.short_name} width: #{text.width}"
 
       text.x = x + ((sprite.width - text.width) / 2).to_i
       text.y = y
@@ -109,18 +97,13 @@ module Cards::CardFronts
       end
     end
 
-    def draw_rank(card : Card, screen_x, screen_y)
+    def draw_numeral(card : Card, screen_x, screen_y)
+      sprite = @@sprites["numeral_" + card.suit.to_s]
       heading = 13
       spacing = 5
-      sprite = @@sprites["numeral_" + card.suit.to_s]
+      spacing_v = 2
 
-      if card.rank.ace?
-        sprite = @@sprites["ace_" + card.suit.to_s]
-        x = screen_x + card.width / 2
-        y = screen_y + card.height / 2
-
-        sprite.draw(x: x, y: y, centered: true)
-      elsif card.rank.two? || card.rank.three?
+      if card.rank.two? || card.rank.three?
         x = screen_x + card.width / 2
         y = screen_y + spacing + sprite.height
 
@@ -129,7 +112,7 @@ module Cards::CardFronts
         y = screen_y + card.height - spacing - sprite.height
 
         sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
-      elsif card.rank.numeral?
+      else
         spacing_h = 1
         x = screen_x + heading + spacing_h + sprite.width / 2
         y = screen_y + spacing + sprite.height
@@ -161,21 +144,17 @@ module Cards::CardFronts
         sprite.draw(x: x, y: y, centered: true)
       end
 
-      spacing_v = 2
-
       if card.rank.seven? || card.rank.eight?
         x = screen_x + card.width / 2
         y = screen_y + card.height / 3 + spacing_v
         sprite.draw(x: x, y: y, centered: true)
-      end
 
-      if card.rank.eight?
-        x = screen_x + card.width / 2
-        y = screen_y + card.height - card.height / 3 - spacing_v
-        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
-      end
-
-      if card.rank.nine? || card.rank.ten?
+        if card.rank.eight?
+          x = screen_x + card.width / 2
+          y = screen_y + card.height - card.height / 3 - spacing_v
+          sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
+        end
+      elsif card.rank.nine? || card.rank.ten?
         spacing_h = 1
         x = screen_x + heading + spacing_h + sprite.width / 2
         y = screen_y + spacing + sprite.height * 2 + spacing_v
@@ -190,17 +169,44 @@ module Cards::CardFronts
 
         y = screen_y + card.height - spacing - sprite.height * 2 - spacing_v
         sprite.draw(x: x, y: y, rotation: 180, centered: true)
-      end
 
-      if card.rank.ten?
-        x = screen_x + card.width / 2
-        y = screen_y + card.height / 3 - spacing_v
-        sprite.draw(x: x, y: y, centered: true)
 
-        x = screen_x + card.width / 2
-        y = screen_y + card.height - card.height / 3 + spacing_v
-        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
+        if card.rank.ten?
+          x = screen_x + card.width / 2
+          y = screen_y + card.height / 3 - spacing_v
+          sprite.draw(x: x, y: y, centered: true)
+
+          x = screen_x + card.width / 2
+          y = screen_y + card.height - card.height / 3 + spacing_v
+          sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
+        end
       end
+    end
+
+    def draw_face(card : Card, screen_x, screen_y)
+      text = Game::Text.new(
+        text: card.rank.name,
+        size: 10,
+        spacing: 2,
+        color: card.suit.color
+      )
+
+      text.x = (screen_x + card.width / 2 - text.width / 2).to_i
+      text.y = (screen_y + card.height / 2 - text.height / 2).to_i
+
+      text.draw
+    end
+
+    def draw_ace(card : Card, screen_x, screen_y)
+      sprite = @@sprites["ace_" + card.suit.to_s]
+      sprite.draw(
+        x: screen_x + card.width / 2,
+        y: screen_y + card.height / 2,
+        centered: true
+      )
+    end
+
+    def draw_joker(card : Card, screen_x, screen_y)
     end
   end
 end
