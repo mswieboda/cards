@@ -115,7 +115,7 @@ module Cards::CardFronts
         sprite.draw(x: x, y: y, rotation: 180, centered: true)
       end
 
-      if card.rank.three? || card.rank.five?
+      if card.rank.three? || card.rank.five? || card.rank.nine?
         x = screen_x + card.width / 2
         y = screen_y + card.height / 2
 
@@ -141,6 +141,33 @@ module Cards::CardFronts
       if card.rank.eight?
         x = screen_x + card.width / 2
         y = screen_y + card.height - card.height / 3 - spacing_v
+        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
+      end
+
+      if card.rank.nine? || card.rank.ten?
+        spacing_h = 1
+        x = screen_x + heading + spacing_h + sprite.width / 2
+        y = screen_y + spacing + sprite.height * 2 + spacing_v
+        sprite.draw(x: x, y: y, centered: true)
+
+        y = screen_y + card.height - spacing - sprite.height * 2 - spacing_v
+        sprite.draw(x: x, y: y, rotation: 180, centered: true)
+
+        x = screen_x + card.width - heading - spacing_h - sprite.width / 2
+        y = screen_y + spacing + sprite.height * 2 + spacing_v
+        sprite.draw(x: x, y: y, centered: true)
+
+        y = screen_y + card.height - spacing - sprite.height * 2 - spacing_v
+        sprite.draw(x: x, y: y, rotation: 180, centered: true)
+      end
+
+      if card.rank.ten?
+        x = screen_x + card.width / 2
+        y = screen_y + card.height / 3 - spacing_v
+        sprite.draw(x: x, y: y, centered: true)
+
+        x = screen_x + card.width / 2
+        y = screen_y + card.height - card.height / 3 + spacing_v
         sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
       end
     end
