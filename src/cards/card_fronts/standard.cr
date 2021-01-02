@@ -81,16 +81,15 @@ module Cards::CardFronts
     def draw_rank(card : Card, screen_x, screen_y)
       heading = 13
       spacing = 5
+      sprite = @@sprites["numeral_" + card.suit.to_s]
 
-      case card.rank
-      when .ace?
+      if card.rank.ace?
         sprite = @@sprites["ace_" + card.suit.to_s]
-        x = screen_x + card.width / 2 - sprite.width / 2
-        y = screen_y + card.height / 2 - sprite.height / 2
+        x = screen_x + card.width / 2
+        y = screen_y + card.height / 2
 
-        sprite.draw(x: x, y: y)
-      when .two?, .three?
-        sprite = @@sprites["numeral_" + card.suit.to_s]
+        sprite.draw(x: x, y: y, centered: true)
+      elsif card.rank.two? || card.rank.three?
         x = screen_x + card.width / 2
         y = screen_y + spacing + sprite.height
 
@@ -99,32 +98,50 @@ module Cards::CardFronts
         y = screen_y + card.height - spacing - sprite.height
 
         sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
-      when .four?, .five?
+      elsif card.rank.numeral?
         spacing_h = 1
-        sprite = @@sprites["numeral_" + card.suit.to_s]
         x = screen_x + heading + spacing_h + sprite.width / 2
         y = screen_y + spacing + sprite.height
         sprite.draw(x: x, y: y, centered: true)
 
         y = screen_y + card.height - spacing - sprite.height
-        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
+        sprite.draw(x: x, y: y, rotation: 180, centered: true)
 
         x = screen_x + card.width - heading - spacing_h - sprite.width / 2
         y = screen_y + spacing + sprite.height
         sprite.draw(x: x, y: y, centered: true)
 
         y = screen_y + card.height - spacing - sprite.height
-        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
-      else
-        # raise "CardFronts::Standard#draw_rank error rank not found: #{card.rank}"
+        sprite.draw(x: x, y: y, rotation: 180, centered: true)
       end
 
       if card.rank.three? || card.rank.five?
-        sprite = @@sprites["numeral_" + card.suit.to_s]
         x = screen_x + card.width / 2
         y = screen_y + card.height / 2
 
         sprite.draw(x: x, y: y, centered: true)
+      elsif card.rank.six? || card.rank.seven? || card.rank.eight?
+        spacing_h = 1
+        x = screen_x + heading + spacing_h + sprite.width / 2
+        y = screen_y + card.height / 2
+        sprite.draw(x: x, y: y, centered: true)
+
+        x = screen_x + card.width - heading - spacing_h - sprite.width / 2
+        sprite.draw(x: x, y: y, centered: true)
+      end
+
+      spacing_v = 2
+
+      if card.rank.seven? || card.rank.eight?
+        x = screen_x + card.width / 2
+        y = screen_y + card.height / 3 + spacing_v
+        sprite.draw(x: x, y: y, centered: true)
+      end
+
+      if card.rank.eight?
+        x = screen_x + card.width / 2
+        y = screen_y + card.height - card.height / 3 - spacing_v
+        sprite.draw(x: x - 1, y: y, rotation: 180, centered: true)
       end
     end
   end
