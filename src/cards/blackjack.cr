@@ -8,27 +8,32 @@ module Cards
       super
 
       @deck = StandardDeck.new(jokers: true)
+      layout_cards
     end
 
     def update(frame_time)
+      @deck.update(frame_time)
+
       if Game::Key::Space.pressed?
         @deck.shuffle!
         @deck.cards.each(&.flip)
+        layout_cards
       end
     end
 
     def draw
       super
 
-      draw_row_of_cards
+      @deck.draw
     end
 
-    def draw_row_of_cards
+    def layout_cards
       x = MARGIN
       y = MARGIN
 
       @deck.cards.each_with_index do |card, index|
-        card.draw(screen_x: x, screen_y: y)
+        card.x = x
+        card.y = y
 
         x += card.width + MARGIN
 
