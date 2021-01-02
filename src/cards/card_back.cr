@@ -9,18 +9,20 @@ module Cards
     end
 
     def draw(screen_x, screen_y, width, height)
-      draw_back_border(screen_x, screen_y, width, height)
       draw_design(screen_x + BORDER, screen_y + BORDER, width - BORDER * 2, height - BORDER * 2)
+      draw_border(screen_x + BORDER, screen_y + BORDER, width - BORDER * 2, height - BORDER * 2)
     end
 
-    def draw_back_border(screen_x, screen_y, width, height)
+    def draw_border(screen_x, screen_y, width, height)
       Game::RoundedRectangle.new(
         x: screen_x,
         y: screen_y,
         width: width,
         height: height,
         roundness: 0.15_f32,
-        color: Game::Color::Ivory
+        thickness: BORDER,
+        color: Game::Color::Ivory,
+        filled: false
       ).draw
     end
   end
