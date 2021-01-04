@@ -5,6 +5,10 @@ module Cards
     property cards : Array(Card)
 
     def initialize(@x = 0, @y = 0, @cards = [] of Card)
+      @cards.each do |card|
+        card.position.x = x
+        card.position.y = y
+      end
     end
 
     def update(frame_time)
@@ -15,10 +19,13 @@ module Cards
       return if cards.empty?
       # draw top card
       # TODO: draw shadow bottom/right to show depth if more than 1 card?
-      cards[-1].draw(screen_x + x, screen_y + y)
+      cards[-1].draw(screen_x, screen_y)
     end
 
     def add(card : Card)
+      card.position.x = x
+      card.position.y = y
+
       @cards << card
     end
 

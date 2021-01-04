@@ -6,7 +6,7 @@ module Cards
     property suit : Suit
     property? flipped
     property? selected
-    getter? moved
+    property move_to : Nil | Game::Vector
 
     delegate :x, :y, to: position
 
@@ -51,32 +51,46 @@ module Cards
       rank.joker? ? rank.short_name : rank.short_name + suit.short_name
     end
 
-    def move_to(position : Game::Vector)
-      @moved = false
+    def moving?
+      !!@move_to
+    end
 
-      # TODO: temp until it's moving between multiple frames
-      @position.x = position.x
-      @position.y = position.y
-      @moved = true
+    def moved?
+      !moving?
     end
 
     def update(frame_time)
-      if Game::Mouse::Left.pressed?
-        mouse_x = Game::Mouse.x
-        mouse_y = Game::Mouse.y
+      if moving?
+        if move_to = @move_to
+          direction = move_to.subtract(position)
 
-        if mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height
-          @selected = true
-        else
-          @selected = false
+          # TODO: scale the direction to a unit of movement (like 2 pixels per frame etc)
+          # then apply dx, dy of that direction to `position`
+          # position.x +=
+
+          # if we've reached or gone past `move_to`, set x, y and reset `move_to` to nil
+          @position.x = move_to.x
+          @position.y = move_to.y
+          @move_to = nil
         end
-      end
+      else
+        if Game::Mouse::Left.pressed?
+          mouse_x = Game::Mouse.x
+          mouse_y = Game::Mouse.y
 
-      if selected?
-        position.y -= MOVEMENT if Game::Keys.down?([Game::Key::W, Game::Key::Up])
-        position.x -= MOVEMENT if Game::Keys.down?([Game::Key::A, Game::Key::Left])
-        position.y += MOVEMENT if Game::Keys.down?([Game::Key::S, Game::Key::Down])
-        position.x += MOVEMENT if Game::Keys.down?([Game::Key::D, Game::Key::Right])
+          if mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height
+            @selected = true
+          else
+            @selected = false
+          end
+        end
+
+        if selected?
+          position.y -= MOVEMENT if Game::Keys.down?([Game::Key::W, Game::Key::Up])
+          position.x -= MOVEMENT if Game::Keys.down?([Game::Key::A, Game::Key::Left])
+          position.y += MOVEMENT if Game::Keys.down?([Game::Key::S, Game::Key::Down])
+          position.x += MOVEMENT if Game::Keys.down?([Game::Key::D, Game::Key::Right])
+        end
       end
     end
 

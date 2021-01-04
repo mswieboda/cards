@@ -8,11 +8,12 @@ module Cards
     def initialize(@card_spots = [] of CardSpot, @cards = [] of Card)
     end
 
-    def update(_frame_time)
+    def update(frame_time)
+      cards.each(&.update(frame_time))
+
       if dealing?
         if dealing_card = @dealing_card
           if dealing_card.moved?
-            @cards << dealing_card
             @dealing_card = nil
           end
         end
@@ -29,13 +30,14 @@ module Cards
     end
 
     def dealt?
-      cards.size == 2
+      !dealing? && cards.size == 2
     end
 
     def deal(card : Card)
       card.flip if card.flipped?
       card_spot = card_spots[cards.size]
-      card.move_to(card_spot.position)
+      card.move_to = card_spot.position
+      @cards << card
       @dealing_card = card
     end
   end

@@ -22,7 +22,7 @@ module Cards
       super
 
       # make sure 2nd card gets double flipped for dealer, staying covered
-      card.flip if cards.size == 1 && !card.flipped?
+      card.flip if cards.size == 2 && !card.flipped?
     end
   end
 end
