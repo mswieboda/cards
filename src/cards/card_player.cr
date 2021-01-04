@@ -35,7 +35,7 @@ module Cards
     def deal(card : Card)
       card.flip if card.flipped?
       card_spot = card_spots[cards.size]
-      card.move_to(card_spot)
+      card.move_to(card_spot.position)
       @dealing_card = card
     end
   end

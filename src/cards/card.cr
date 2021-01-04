@@ -1,13 +1,14 @@
 module Cards
   class Card
-    property x : Int32 | Float32
-    property y : Int32 | Float32
+    property position : Game::Vector
     property deck : Deck
     property rank : Rank
     property suit : Suit
     property? flipped
     property? selected
     getter? moved
+
+    delegate :x, :y, to: position
 
     # bicycle card size in mm from https://en.wikipedia.org/wiki/Standard_52-card_deck#Size_of_the_cards
     WIDTH = 64
@@ -16,7 +17,7 @@ module Cards
     MOVEMENT = 2
 
     def initialize(@deck, @rank, @suit, @flipped = true)
-      @x = @y = 0
+      @position = Game::Vector.new
       @selected = false
       @moved = false
     end
@@ -50,12 +51,12 @@ module Cards
       rank.joker? ? rank.short_name : rank.short_name + suit.short_name
     end
 
-    def move_to(card_spot : CardSpot)
+    def move_to(position : Game::Vector)
       @moved = false
 
       # TODO: temp until it's moving between multiple frames
-      @x = card_spot.x
-      @y = card_spot.y
+      @position.x = position.x
+      @position.y = position.y
       @moved = true
     end
 
@@ -72,10 +73,10 @@ module Cards
       end
 
       if selected?
-        @y -= MOVEMENT if Game::Keys.down?([Game::Key::W, Game::Key::Up])
-        @x -= MOVEMENT if Game::Keys.down?([Game::Key::A, Game::Key::Left])
-        @y += MOVEMENT if Game::Keys.down?([Game::Key::S, Game::Key::Down])
-        @x += MOVEMENT if Game::Keys.down?([Game::Key::D, Game::Key::Right])
+        position.y -= MOVEMENT if Game::Keys.down?([Game::Key::W, Game::Key::Up])
+        position.x -= MOVEMENT if Game::Keys.down?([Game::Key::A, Game::Key::Left])
+        position.y += MOVEMENT if Game::Keys.down?([Game::Key::S, Game::Key::Down])
+        position.x += MOVEMENT if Game::Keys.down?([Game::Key::D, Game::Key::Right])
       end
     end
 

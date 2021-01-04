@@ -1,7 +1,8 @@
 module Cards
   class CardSpot
-    property x : Int32 | Float32
-    property y : Int32 | Float32
+    property position : Game::Vector
+
+    delegate :x, :y, to: position
 
     WIDTH = Card::WIDTH
     HEIGHT = Card::HEIGHT
@@ -9,7 +10,11 @@ module Cards
     MARGIN = 10
     BORDER = 2
 
-    def initialize(@x = 0, @y = 0)
+    def initialize(@position = Game::Vector.new)
+    end
+
+    def initialize(x, y)
+      @position = Game::Vector.new(x: x, y: y)
     end
 
     def self.margin
