@@ -2,7 +2,7 @@ module Cards
   class StandardDeck < Deck
     property? jokers
 
-    def initialize(@back = CardBacks::Stripes.new, @jokers = false, flipped = false)
+    def initialize(@back = CardBacks::Stripes.new, @jokers = false, flipped = true)
       cards = [] of Card
 
       # adds 52 standard cards from diamonds, clubs, hearts, spades

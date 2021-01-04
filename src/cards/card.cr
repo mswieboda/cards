@@ -1,7 +1,7 @@
 module Cards
   class Card
-    property x : Int32
-    property y : Int32
+    property x : Int32 | Float32
+    property y : Int32 | Float32
     property deck : Deck
     property rank : Rank
     property suit : Suit
@@ -14,7 +14,7 @@ module Cards
 
     MOVEMENT = 2
 
-    def initialize(@deck, @rank, @suit, @flipped = false)
+    def initialize(@deck, @rank, @suit, @flipped = true)
       @x = @y = 0
       @selected = false
     end
