@@ -6,12 +6,16 @@ module Cards
     WIDTH = Card::WIDTH
     HEIGHT = Card::HEIGHT
 
+    MARGIN = 10
     BORDER = 2
 
     def initialize(@x = 0, @y = 0)
     end
 
-    # methods for width/height in case of changing to instance vars later
+    def self.margin
+      MARGIN
+    end
+
     def self.width
       WIDTH
     end
@@ -21,11 +25,11 @@ module Cards
     end
 
     def width
-      WIDTH
+      self.class.width
     end
 
     def height
-      HEIGHT
+      self.class.height
     end
 
     def draw(screen_x = 0, screen_y = 0)

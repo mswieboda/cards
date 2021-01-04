@@ -7,6 +7,7 @@ module Cards
     property suit : Suit
     property? flipped
     property? selected
+    getter? moved
 
     # bicycle card size in mm from https://en.wikipedia.org/wiki/Standard_52-card_deck#Size_of_the_cards
     WIDTH = 64
@@ -17,15 +18,24 @@ module Cards
     def initialize(@deck, @rank, @suit, @flipped = true)
       @x = @y = 0
       @selected = false
+      @moved = false
+    end
+
+    def self.width
+      WIDTH
+    end
+
+    def self.height
+      HEIGHT
     end
 
     # methods for width/height in case of changing to instance vars later
     def width
-      WIDTH
+      self.class.width
     end
 
     def height
-      HEIGHT
+      self.class.height
     end
 
     def flip
@@ -38,6 +48,15 @@ module Cards
 
     def short_name
       rank.joker? ? rank.short_name : rank.short_name + suit.short_name
+    end
+
+    def move_to(card_spot : CardSpot)
+      @moved = false
+
+      # TODO: temp until it's moving between multiple frames
+      @x = card_spot.x
+      @y = card_spot.y
+      @moved = true
     end
 
     def update(frame_time)
@@ -88,6 +107,13 @@ module Cards
           filled: false
         ).draw
       end
+    end
+
+    def to_s(io : IO)
+      io << "#<#{self.class} "
+      io << "rank: #{rank}, "
+      io << "suit: #{suit}"
+      io << ">"
     end
   end
 end
