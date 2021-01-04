@@ -24,6 +24,8 @@ module Cards
         x: CardSpot.margin,
         y: CardSpot.margin
       )
+
+      @deck_stack.shuffle!
     end
 
     def update(frame_time)
@@ -57,8 +59,6 @@ module Cards
     end
 
     def deal
-      puts ">>> deal!"
-
       player = turn_player
 
       player.deal(@deck_stack.take) unless player.dealt?

@@ -33,6 +33,8 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
+      return unless Main::DEBUG
+
       Game::RoundedRectangle.new(
         x: screen_x + x,
         y: screen_y + y,

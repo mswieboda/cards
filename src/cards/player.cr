@@ -22,9 +22,7 @@ module Cards
     def update(_frame_time)
       super
 
-      # place bet
       if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
-        puts ">>> Player placed bet!"
         @placed_bet = true
       end
     end
