@@ -76,6 +76,7 @@ module Cards
       if player.hitting?
         player.hitting = false
         player.deal(@deck_stack.take)
+        player.hand_check
       end
 
       next_turn if player.played?

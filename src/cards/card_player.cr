@@ -11,7 +11,7 @@ module Cards
 
     ACTION_DELAY = 0.33_f32
     DEAL_DELAY = ACTION_DELAY
-    DONE_DELAY = 0.69_f32
+    DONE_DELAY = 1.69_f32
 
     def initialize(@card_spots = [] of CardSpot, @cards = [] of Card)
       @playing = false
@@ -99,18 +99,36 @@ module Cards
     def play
       puts ">>> #{self.class}#play" if Main::DEBUG
       @playing = true
+      hand_check
+    end
+
+    def hand_check
+      hand = hand_value
+
+      puts ">>> #{self.class}#hand_check, hand: #{hand} cards: #{cards.map(&.short_name)}" if Main::DEBUG
+
+      if hand > 21
+        bust
+      elsif hand == 21
+        if hand_value(cards[0..1]) == 21
+          blackjack
+        else
+          twenty_one
+        end
+      end
     end
 
     def play_done
       puts ">>> #{self.class}#play_done" if Main::DEBUG
+      @hitting = false
       @playing = false
       @played = true
+      delay(done_delay)
     end
 
     def stand
       puts ">>> #{self.class}#stand" if Main::DEBUG
       play_done
-      delay(done_delay)
     end
 
     def hit
@@ -147,7 +165,7 @@ module Cards
       @done = false
     end
 
-    def hand_value
+    def hand_value(cards = @cards)
       cards.map do |card|
         card.rank.face? ? 10 : card.rank.value
       end.sum

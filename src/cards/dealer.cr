@@ -3,7 +3,7 @@ module Cards
     CARD_SPOT_Y_RATIO = 6_f32
 
     ACTION_DELAY = 0.69_f32
-    DONE_DELAY = 1.3_f32
+    DONE_DELAY = 1.69_f32
 
     def initialize
       card_spots = [] of CardSpot
@@ -29,12 +29,9 @@ module Cards
     end
 
     def update(_frame_time)
-      puts ">>> Dealer delay: #{@elapsed_delay_time}/#{@delay_time}" if Main::DEBUG && delay?
       return unless super
 
       if playing? && !hitting?
-        puts ">>> Dealer playing no delay" if Main::DEBUG
-
         if card = cards[1]
           if card.flipped?
             card.flip
@@ -46,19 +43,13 @@ module Cards
 
             hand = hand_value
 
-            puts ">>> #{self.class} playing, hand: #{hand} cards: #{cards.map(&.to_s)}" if Main::DEBUG
+            puts ">>> #{self.class} playing, hand: #{hand} cards: #{cards.map(&.short_name)}" if Main::DEBUG
 
             if hand >= 17 && !soft_17?
-              if hand > 21
-                bust
-              else
-                stand
-              end
-
-              return
+              stand
+            else
+              hit
             end
-
-            hit
           end
         end
       end
