@@ -38,6 +38,7 @@ module Cards
         if card = cards[1]
           if card.flipped?
             card.flip
+            delay(action_delay)
           else
             # drawing cards until the hand busts or achieves a value of 17 or higher
             # (a dealer total of 17 including an ace valued as 11, also known as a "soft 17", must be drawn to in some games and must stand in others).
@@ -54,17 +55,21 @@ module Cards
                 stand
               end
 
-              delay(DONE_DELAY)
-
               return
             end
 
             hit
           end
-
-          delay(ACTION_DELAY)
         end
       end
+    end
+
+    def action_delay
+      ACTION_DELAY
+    end
+
+    def done_delay
+      DONE_DELAY
     end
   end
 end

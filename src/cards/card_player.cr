@@ -9,6 +9,8 @@ module Cards
 
     @dealing_card : Nil | Card
 
+    ACTION_DELAY = 0.33_f32
+    DEAL_DELAY = ACTION_DELAY
     DONE_DELAY = 0.69_f32
 
     def initialize(@card_spots = [] of CardSpot, @cards = [] of Card)
@@ -50,13 +52,25 @@ module Cards
       cards.each(&.draw(screen_x, screen_y))
     end
 
+    def delay?
+      @delay_time > 0_f32 && @elapsed_delay_time < @delay_time
+    end
+
     def delay(sec : Int32 | Float32)
       @elapsed_delay_time = 0_f32
       @delay_time = sec
     end
 
-    def delay?
-      @delay_time > 0_f32 && @elapsed_delay_time < @delay_time
+    def action_delay
+      ACTION_DELAY
+    end
+
+    def deal_delay
+      DEAL_DELAY
+    end
+
+    def done_delay
+      DONE_DELAY
     end
 
     def dealing?
@@ -78,6 +92,8 @@ module Cards
       card.move_to = position
       @cards << card
       @dealing_card = card
+
+      delay(deal_delay)
     end
 
     def play
@@ -94,11 +110,13 @@ module Cards
     def stand
       puts ">>> #{self.class}#stand" if Main::DEBUG
       play_done
+      delay(done_delay)
     end
 
     def hit
       puts ">>> #{self.class}#hit" if Main::DEBUG
       @hitting = true
+      delay(action_delay)
     end
 
     def bust
@@ -118,8 +136,8 @@ module Cards
 
     def done
       puts ">>> #{self.class}#done" if Main::DEBUG
-      delay(DONE_DELAY)
       @done = true
+      delay(deal_delay)
     end
 
     def new_hand
