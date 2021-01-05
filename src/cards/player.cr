@@ -21,7 +21,11 @@ module Cards
       super
 
       if playing?
-        stand if Game::Key::Space.pressed?
+        if Game::Key::Space.pressed?
+          stand
+        elsif Game::Key::Enter.pressed?
+          hit
+        end
       else
         if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
           @placed_bet = true

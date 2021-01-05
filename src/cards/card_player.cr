@@ -5,6 +5,7 @@ module Cards
     getter? playing
     getter? played
     getter? done
+    property? hitting
 
     @dealing_card : Nil | Card
 
@@ -14,6 +15,7 @@ module Cards
       @playing = false
       @played = false
       @done = false
+      @hitting = false
     end
 
     def update(frame_time)
@@ -38,13 +40,18 @@ module Cards
     end
 
     def dealt?
-      !dealing? && cards.size == 2
+      !dealing? && cards.size >= 2
     end
 
     def deal(card : Card)
       card.flip if card.flipped?
-      card_spot = card_spots[cards.size]
-      card.move_to = card_spot.position
+
+      position = card_spots[[cards.size, card_spots.size - 1].min].position.copy
+
+      # move over if we've already used all the spots
+      position.x += CardSpot.margin * (2 * cards.size - card_spots.size) if cards.size >= card_spots.size
+
+      card.move_to = position
       @cards << card
       @dealing_card = card
     end
@@ -56,6 +63,10 @@ module Cards
     def stand
       @playing = false
       @played = true
+    end
+
+    def hit
+      @hitting = true
     end
 
     def done

@@ -72,6 +72,12 @@ module Cards
 
     def play(player : CardPlayer)
       player.play if !player.playing?
+
+      if player.hitting?
+        player.hitting = false
+        player.deal(@deck_stack.take)
+      end
+
       next_turn if player.played?
     end
 
