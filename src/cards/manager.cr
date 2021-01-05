@@ -31,15 +31,7 @@ module Cards
     def update(frame_time)
       players.each(&.update(frame_time))
 
-      return if players.any?(&.dealing?)
-
-      if seat_players.all?(&.placed_bet?)
-        if players.all?(&.dealt?)
-          # TODO: play hands
-        else
-          deal
-        end
-      end
+      manage_turn
     end
 
     def draw(screen_x = 0, screen_y = 0)
@@ -49,18 +41,73 @@ module Cards
       @discard_stack.draw(screen_x, screen_y)
     end
 
+    def turn_player
+      players[@turn_index]
+    end
+
     def next_turn
       @turn_index += 1
       @turn_index = 0 if @turn_index >= players.size
     end
 
-    def turn_player
-      players[@turn_index]
+    def manage_turn
+      return if players.any?(&.dealing?)
+
+      if seat_players.all?(&.placed_bet?)
+        player = turn_player
+
+        if play_hand?
+          play(player)
+        elsif players.all?(&.played?)
+          done(player)
+        else
+          deal(player)
+        end
+      end
     end
 
-    def deal
-      player = turn_player
+    def play_hand?
+      players.all?(&.dealt?) && !players.all?(&.played?)
+    end
 
+    def play(player : CardPlayer)
+      player.play if !player.playing?
+      next_turn if player.played?
+    end
+
+    def done(player : CardPlayer)
+      if player.done?
+        # clear cards
+        player.cards.select(&.moved?).each do |card|
+          if card = player.cards.delete(card)
+            @discard_stack.add(card)
+          end
+        end
+
+        if player.cards.empty?
+          next_turn
+
+          new_hand if players.all? { |p| p.done? && p.cards.empty? }
+        end
+      else
+        # start moving cards
+        player.done
+
+        player.cards.each do |card|
+          card.move_to = @discard_stack.position
+        end
+      end
+    end
+
+    def new_hand
+      @turn_index = 0
+
+      players.each do |player|
+        player.new_hand
+      end
+    end
+
+    def deal(player : CardPlayer)
       player.deal(@deck_stack.take) unless player.dealt?
 
       next_turn

@@ -1,10 +1,14 @@
 module Cards
   class Stack
-    property x : Int32
-    property y : Int32
+    property position : Game::Vector
     property cards : Array(Card)
 
-    def initialize(@x = 0, @y = 0, @cards = [] of Card)
+    def initialize(x = 0, y = 0, @cards = [] of Card)
+      @position = Game::Vector.new(
+        x: x,
+        y: y
+      )
+
       @cards.each do |card|
         card.position.x = x
         card.position.y = y
@@ -23,8 +27,10 @@ module Cards
     end
 
     def add(card : Card)
-      card.position.x = x
-      card.position.y = y
+      card.position.x = position.x
+      card.position.y = position.y
+
+      card.flip unless card.flipped?
 
       @cards << card
     end

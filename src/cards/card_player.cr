@@ -2,10 +2,18 @@ module Cards
   abstract class CardPlayer
     property card_spots : Array(CardSpot)
     property cards : Array(Card)
+    getter? playing
+    getter? played
+    getter? done
 
     @dealing_card : Nil | Card
 
+    DONE_DELAY = 0.69
+
     def initialize(@card_spots = [] of CardSpot, @cards = [] of Card)
+      @playing = false
+      @played = false
+      @done = false
     end
 
     def update(frame_time)
@@ -39,6 +47,26 @@ module Cards
       card.move_to = card_spot.position
       @cards << card
       @dealing_card = card
+    end
+
+    def play
+      @playing = true
+    end
+
+    def stand
+      @playing = false
+      @played = true
+    end
+
+    def done
+      sleep DONE_DELAY
+      @done = true
+    end
+
+    def new_hand
+      @playing = false
+      @played = false
+      @done = false
     end
   end
 end

@@ -2,8 +2,6 @@ require "./seat_player"
 
 module Cards
   class Player < SeatPlayer
-    getter? placed_bet
-
     def initialize
       card_spots = [] of CardSpot
       card_spots << CardSpot.new(
@@ -22,8 +20,12 @@ module Cards
     def update(_frame_time)
       super
 
-      if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
-        @placed_bet = true
+      if playing?
+        stand if Game::Key::Space.pressed?
+      else
+        if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
+          @placed_bet = true
+        end
       end
     end
   end
