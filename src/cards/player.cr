@@ -18,7 +18,7 @@ module Cards
     end
 
     def update(_frame_time)
-      super
+      return unless super
 
       if playing?
         if Game::Key::Space.pressed?

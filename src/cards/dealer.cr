@@ -2,8 +2,8 @@ module Cards
   class Dealer < CardPlayer
     CARD_SPOT_Y_RATIO = 6_f32
 
-    ACTION_DELAY = 0.3
-    DONE_DELAY = 0.5
+    ACTION_DELAY = 0.69_f32
+    DONE_DELAY = 1.3_f32
 
     def initialize
       card_spots = [] of CardSpot
@@ -29,18 +29,40 @@ module Cards
     end
 
     def update(_frame_time)
-      super
+      puts ">>> Dealer delay: #{@elapsed_delay_time}/#{@delay_time}" if Main::DEBUG && delay?
+      return unless super
 
-      if playing?
+      if playing? && !hitting?
+        puts ">>> Dealer playing no delay" if Main::DEBUG
+
         if card = cards[1]
           if card.flipped?
-            sleep ACTION_DELAY
             card.flip
           else
-            sleep ACTION_DELAY
-            stand
-            sleep ACTION_DELAY
+            # drawing cards until the hand busts or achieves a value of 17 or higher
+            # (a dealer total of 17 including an ace valued as 11, also known as a "soft 17", must be drawn to in some games and must stand in others).
+            # The dealer never doubles, splits, or surrenders
+
+            hand = hand_value
+
+            puts ">>> #{self.class} playing, hand: #{hand} cards: #{cards.map(&.to_s)}" if Main::DEBUG
+
+            if hand >= 17 && !soft_17?
+              if hand > 21
+                bust
+              else
+                stand
+              end
+
+              delay(DONE_DELAY)
+
+              return
+            end
+
+            hit
           end
+
+          delay(ACTION_DELAY)
         end
       end
     end

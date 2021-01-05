@@ -53,21 +53,21 @@ module Cards
     def manage_turn
       return if players.any?(&.dealing?)
 
-      if seat_players.all?(&.placed_bet?)
+      if seat_players.all?(&.placed_bet?) && players.none?(&.delay?)
         player = turn_player
 
         if play_hand?
           play(player)
-        elsif players.all?(&.played?)
+        elsif done?
           done(player)
-        else
+        elsif deal?
           deal(player)
         end
       end
     end
 
     def play_hand?
-      players.all?(&.dealt?) && !players.all?(&.played?)
+      players.all?(&.dealt?) && !players.all?(&.played?) && players.none?(&.delay?)
     end
 
     def play(player : CardPlayer)
@@ -79,6 +79,10 @@ module Cards
       end
 
       next_turn if player.played?
+    end
+
+    def done?
+      players.all?(&.played?) && players.none?(&.delay?)
     end
 
     def done(player : CardPlayer)
@@ -93,7 +97,7 @@ module Cards
         if player.cards.empty?
           next_turn
 
-          new_hand if players.all? { |p| p.done? && p.cards.empty? }
+          new_hand if players.all? { |p| p.done? && p.cards.empty? && !p.delay? }
         end
       else
         # start moving cards
@@ -111,6 +115,10 @@ module Cards
       players.each do |player|
         player.new_hand
       end
+    end
+
+    def deal?
+      players.none?(&.delay?)
     end
 
     def deal(player : CardPlayer)
