@@ -103,9 +103,9 @@ module Cards
     end
 
     def hand_check
-      hand = hand_value
+      puts ">>> #{self.class}#hand_check, hand: #{hand_display} cards: #{cards.map(&.short_name)}" if Main::DEBUG
 
-      puts ">>> #{self.class}#hand_check, hand: #{hand} cards: #{cards.map(&.short_name)}" if Main::DEBUG
+      hand = hand_value
 
       if hand > 21
         bust
@@ -166,9 +166,25 @@ module Cards
     end
 
     def hand_value(cards = @cards)
-      cards.map do |card|
+      hand = cards.map do |card|
         card.rank.face? ? 10 : card.rank.value
       end.sum
+
+      hand += 10 if cards.any?(&.rank.ace?) && hand + 10 <= 21
+
+      hand
+    end
+
+    def hand_display
+      hand = cards.map do |card|
+        card.rank.face? ? 10 : card.rank.value
+      end.sum
+
+      if cards.any?(&.rank.ace?) && hand + 10 < 21
+        "#{hand}/#{hand + 10}"
+      else
+        hand.to_s
+      end
     end
 
     def soft_17?

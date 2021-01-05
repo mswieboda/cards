@@ -43,7 +43,7 @@ module Cards
 
             hand = hand_value
 
-            puts ">>> #{self.class} playing, hand: #{hand} cards: #{cards.map(&.short_name)}" if Main::DEBUG
+            puts ">>> #{self.class} playing, hand: #{hand_display} cards: #{cards.map(&.short_name)}" if Main::DEBUG
 
             if hand >= 17 && !soft_17?
               stand
