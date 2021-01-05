@@ -5,21 +5,22 @@ module Cards
     property rank : Rank
     property suit : Suit
     property? flipped
-    property? selected
-    property move_to : Nil | Game::Vector
 
     delegate :x, :y, to: position
+
+    @move_to : Nil | Game::Vector
+    @move_delta : Game::Vector
 
     # bicycle card size in mm from https://en.wikipedia.org/wiki/Standard_52-card_deck#Size_of_the_cards
     WIDTH = 64
     HEIGHT = 88
 
-    MOVEMENT = 2
+    MOVEMENT_FRAMES = 15
 
     def initialize(@deck, @rank, @suit, @flipped = true)
       @position = Game::Vector.new
-      @selected = false
-      @moved = false
+      @move_to = nil
+      @move_delta = Game::Vector.new
     end
 
     def self.width
@@ -59,37 +60,30 @@ module Cards
       !moving?
     end
 
+    def move(move_to : Game::Vector)
+      @move_to = move_to.copy
+      @move_delta = move_to.subtract(position) / MOVEMENT_FRAMES
+    end
+
     def update(frame_time)
       if moving?
         if move_to = @move_to
-          direction = move_to.subtract(position)
+          @position.x += @move_delta.x
+          @position.y += @move_delta.y
 
-          # TODO: scale the direction to a unit of movement (like 2 pixels per frame etc)
-          # then apply dx, dy of that direction to `position`
-          # position.x +=
-
-          # if we've reached or gone past `move_to`, set x, y and reset `move_to` to nil
-          @position.x = move_to.x
-          @position.y = move_to.y
-          @move_to = nil
-        end
-      else
-        if Game::Mouse::Left.pressed?
-          mouse_x = Game::Mouse.x
-          mouse_y = Game::Mouse.y
-
-          if mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height
-            @selected = true
-          else
-            @selected = false
+          # if we've reached or gone past `move_to`, snap to it
+          if (@move_delta.x.sign >= 0 && @move_delta.x + @position.x >= move_to.x) ||
+            (@move_delta.x.sign < 0 && @move_delta.x + @position.x <= move_to.x)
+            @position.x = move_to.x
           end
-        end
 
-        if selected?
-          position.y -= MOVEMENT if Game::Keys.down?([Game::Key::W, Game::Key::Up])
-          position.x -= MOVEMENT if Game::Keys.down?([Game::Key::A, Game::Key::Left])
-          position.y += MOVEMENT if Game::Keys.down?([Game::Key::S, Game::Key::Down])
-          position.x += MOVEMENT if Game::Keys.down?([Game::Key::D, Game::Key::Right])
+          if (@move_delta.y.sign >= 0 && @move_delta.y + @position.y >= move_to.y) ||
+            (@move_delta.y.sign < 0 && @move_delta.y + @position.y <= move_to.y)
+            @position.y = move_to.y
+          end
+
+          # if we're there, clear `move_to`
+          @move_to = nil if @position.x == move_to.x && @position.y == move_to.y
         end
       end
     end
@@ -108,19 +102,6 @@ module Cards
           screen_x: screen_x + x,
           screen_y: screen_y + y
         )
-      end
-
-      if selected?
-        Game::RoundedRectangle.new(
-          x: screen_x + x,
-          y: screen_y + y,
-          width: width,
-          height: height,
-          roundness: 0.15_f32,
-          thickness: 3,
-          color: Game::Color::Blue,
-          filled: false
-        ).draw
       end
     end
 

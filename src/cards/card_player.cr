@@ -89,7 +89,7 @@ module Cards
       # move over if we've already used all the spots
       position.x += CardSpot.margin * (2 * cards.size - card_spots.size) if cards.size >= card_spots.size
 
-      card.move_to = position
+      card.move(position)
       @cards << card
       @dealing_card = card
 

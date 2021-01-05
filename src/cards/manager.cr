@@ -104,7 +104,7 @@ module Cards
         player.done
 
         player.cards.each do |card|
-          card.move_to = @discard_stack.position
+          card.move(@discard_stack.position)
         end
       end
     end
