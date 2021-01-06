@@ -37,21 +37,32 @@ module Cards
             card.flip
             delay(action_delay)
           else
-            # drawing cards until the hand busts or achieves a value of 17 or higher
-            # (a dealer total of 17 including an ace valued as 11, also known as a "soft 17", must be drawn to in some games and must stand in others).
-            # The dealer never doubles, splits, or surrenders
-
-            hand = hand_value
-
             puts ">>> #{self.class} playing, hand: #{hand_display} cards: #{cards.map(&.short_name)}" if Main::DEBUG
 
-            if hand >= 17 && !soft_17?
+            if hand_value >= 17 && !soft_17?
               stand
             else
               hit
             end
           end
         end
+      end
+    end
+
+    def play(all_busted_or_blackjack)
+      puts ">>> #{self.class}#play all_busted_or_blackjack: #{all_busted_or_blackjack}" if Main::DEBUG
+
+      if all_busted_or_blackjack
+        # flip card, and end turn
+        if card = cards[1]
+          if card.flipped?
+            card.flip
+            play_done
+            delay(action_delay)
+          end
+        end
+      else
+        play
       end
     end
 

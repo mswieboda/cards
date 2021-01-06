@@ -2,19 +2,19 @@ require "./seat_player"
 
 module Cards
   class Player < SeatPlayer
-    def initialize
-      card_spots = [] of CardSpot
-      card_spots << CardSpot.new(
-        x: Main.screen_width / 2_f32 - CardSpot.width - CardSpot.margin / 2_f32,
-        y: Main.screen_height / 2_f32 - CardSpot.height / 2_f32
-      )
+    def initialize(balance = 0, @card_spots = [] of CardSpot)
+      if card_spots.empty?
+        card_spots << CardSpot.new(
+          x: Main.screen_width / 2_f32 - CardSpot.width - CardSpot.margin / 2_f32,
+          y: Main.screen_height / 2_f32 - CardSpot.height / 2_f32
+        )
+        card_spots << CardSpot.new(
+          x: Main.screen_width / 2_f32 + CardSpot.margin / 2_f32,
+          y: Main.screen_height / 2_f32 - CardSpot.height / 2_f32
+        )
+      end
 
-      card_spots << CardSpot.new(
-        x: Main.screen_width / 2_f32 + CardSpot.margin / 2_f32,
-        y: Main.screen_height / 2_f32 - CardSpot.height / 2_f32
-      )
-
-      super(card_spots: card_spots)
+      super(balance: balance, card_spots: card_spots)
     end
 
     def update(_frame_time)
@@ -28,7 +28,8 @@ module Cards
         end
       else
         if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
-          @placed_bet = true
+          # TODO: impl chips, player bet changing, for now bet 1
+          place_bet
         end
       end
     end

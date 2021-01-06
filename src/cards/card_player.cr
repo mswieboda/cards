@@ -6,6 +6,8 @@ module Cards
     getter? played
     getter? done
     property? hitting
+    getter? bust
+    getter? blackjack
 
     @dealing_card : Nil | Card
 
@@ -18,6 +20,8 @@ module Cards
       @played = false
       @done = false
       @hitting = false
+      @blackjack = false
+      @bust = false
       @elapsed_delay_time = @delay_time = 0_f32
     end
 
@@ -128,7 +132,7 @@ module Cards
 
     def stand
       puts ">>> #{self.class}#stand" if Main::DEBUG
-      play_done
+      play_done if playing?
     end
 
     def hit
@@ -139,20 +143,22 @@ module Cards
 
     def bust
       puts ">>> #{self.class}#bust" if Main::DEBUG
-      play_done
+      @bust = true
+      play_done if playing?
     end
 
     def twenty_one
       puts ">>> #{self.class}#twenty_one" if Main::DEBUG
-      play_done
+      play_done if playing?
     end
 
     def blackjack
       puts ">>> #{self.class}#blackjack" if Main::DEBUG
-      play_done
+      @blackjack = true
+      play_done if playing?
     end
 
-    def done
+    def done(_dealer : Dealer)
       puts ">>> #{self.class}#done" if Main::DEBUG
       @done = true
       delay(deal_delay)
@@ -160,8 +166,12 @@ module Cards
 
     def new_hand
       puts ">>> #{self.class}#new_hand" if Main::DEBUG
+
+      @hitting = false
       @playing = false
       @played = false
+      @bust = false
+      @blackjack = false
       @done = false
     end
 
@@ -180,15 +190,25 @@ module Cards
         card.rank.face? ? 10 : card.rank.value
       end.sum
 
-      if cards.any?(&.rank.ace?) && hand + 10 < 21
-        "#{hand}/#{hand + 10}"
+      if cards.any?(&.rank.ace?)
+        if hand + 10 < 21
+          "#{hand}/#{hand + 10}"
+        elsif hand + 10 > 21
+          "#{hand}"
+        else # 21
+          if cards.size == 2
+            "blackjack 21"
+          else
+            "#{hand + 10}"
+          end
+        end
       else
         hand.to_s
       end
     end
 
     def soft_17?
-      hand_value == 16 && cards.any?(&.rank.ace?)
+      hand_value == 17 && cards.size == 2 && cards.any?(&.rank.ace?)
     end
   end
 end

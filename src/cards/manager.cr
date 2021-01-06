@@ -14,6 +14,7 @@ module Cards
       @players << @dealer
 
       @turn_index = 0
+      @done_index = 0
 
       @deck_stack = Stack.new(
         x: Main.screen_width - Card.width - CardSpot.margin,
@@ -51,27 +52,49 @@ module Cards
     end
 
     def manage_turn
+      return if players.any?(&.delay?)
       return if players.any?(&.dealing?)
 
-      if seat_players.all?(&.placed_bet?) && players.none?(&.delay?)
+      remove_leaving_players
+
+      if bets_ready?
         player = turn_player
 
         if play_hand?
           play(player)
         elsif done?
+          next_turn if first_turn_and_dealer?(player)
           done(player)
-        elsif deal?
+        else
           deal(player)
         end
       end
     end
 
+    def remove_leaving_players
+      seat_players.select(&.leave_table?).each do |player|
+        # TODO: message that player is leaving table
+        @players.delete(player)
+      end
+    end
+
+    def bets_ready?
+      seat_players.all?(&.placed_bet?)
+    end
+
     def play_hand?
-      players.all?(&.dealt?) && !players.all?(&.played?) && players.none?(&.delay?)
+      players.all?(&.dealt?) && !players.all?(&.played?)
     end
 
     def play(player : CardPlayer)
-      player.play if !player.playing?
+      if !player.playing?
+        if player == @dealer
+          all_busted_or_blackjack = seat_players.all? { |p| p.bust? || p.blackjack? }
+          @dealer.play(all_busted_or_blackjack)
+        else
+          player.play
+        end
+      end
 
       if player.hitting?
         player.hitting = false
@@ -83,7 +106,11 @@ module Cards
     end
 
     def done?
-      players.all?(&.played?) && players.none?(&.delay?)
+      players.all?(&.played?)
+    end
+
+    def first_turn_and_dealer?(player : CardPlayer)
+      @done_index == 0 && player == @dealer
     end
 
     def done(player : CardPlayer)
@@ -96,14 +123,13 @@ module Cards
         end
 
         if player.cards.empty?
+          @done_index += 1
           next_turn
 
-          new_hand if players.all? { |p| p.done? && p.cards.empty? && !p.delay? }
+          new_hand if players.all? { |p| p.done? && p.cards.empty? }
         end
       else
-        # start moving cards
-        player.done
-
+        player.done(@dealer)
         player.cards.each do |card|
           card.move(@discard_stack.position)
         end
@@ -112,14 +138,11 @@ module Cards
 
     def new_hand
       @turn_index = 0
+      @done_index = 0
 
       players.each do |player|
         player.new_hand
       end
-    end
-
-    def deal?
-      players.none?(&.delay?)
     end
 
     def deal(player : CardPlayer)
