@@ -15,7 +15,12 @@ module Cards
 
       if playing?
         # TODO: impl strategy or copy dealer's logic for now
-        stand
+        if hand_value >= 17 && !soft_17?
+          stand
+        else
+          hit
+        end
+
         delay(action_delay)
       end
     end
