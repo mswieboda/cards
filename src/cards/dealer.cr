@@ -6,19 +6,18 @@ module Cards
     DONE_DELAY = 1.69_f32
 
     def initialize
-      card_spots = [] of CardSpot
+      seat = Seat.new(card_spots: [
+        CardSpot.new(
+          x: Main.screen_width / 2_f32 - CardSpot.width - CardSpot.margin / 2_f32,
+          y: Main.screen_height / CARD_SPOT_Y_RATIO - CardSpot.height / 2_f32
+        ),
+        CardSpot.new(
+          x: Main.screen_width / 2_f32 + CardSpot.margin / 2_f32,
+          y: Main.screen_height / CARD_SPOT_Y_RATIO - CardSpot.height / 2_f32
+        )
+      ])
 
-      card_spots << CardSpot.new(
-        x: Main.screen_width / 2_f32 - CardSpot.width - CardSpot.margin / 2_f32,
-        y: Main.screen_height / CARD_SPOT_Y_RATIO - CardSpot.height / 2_f32
-      )
-
-      card_spots << CardSpot.new(
-        x: Main.screen_width / 2_f32 + CardSpot.margin / 2_f32,
-        y: Main.screen_height / CARD_SPOT_Y_RATIO - CardSpot.height / 2_f32
-      )
-
-      super(card_spots: card_spots)
+      super(seat: seat)
     end
 
     def deal(card : Card)
@@ -37,7 +36,7 @@ module Cards
             card.flip
             delay(action_delay)
           else
-            puts ">>> #{self.class} playing, hand: #{hand_display} cards: #{cards.map(&.short_name)}" if Main::DEBUG
+            log(:update, "playing, hand: #{hand_display} cards: #{cards.map(&.short_name)}")
 
             if hand_value >= 17 && !soft_17?
               stand
@@ -50,7 +49,7 @@ module Cards
     end
 
     def play(all_busted_or_blackjack)
-      puts ">>> #{self.class}#play all_busted_or_blackjack: #{all_busted_or_blackjack}" if Main::DEBUG
+      log(:play, "all_busted_or_blackjack: #{all_busted_or_blackjack}")
 
       if all_busted_or_blackjack
         # flip card, and end turn

@@ -1,6 +1,5 @@
 module Cards
   abstract class CardPlayer
-    property card_spots : Array(CardSpot)
     property cards : Array(Card)
     getter? playing
     getter? played
@@ -8,6 +7,7 @@ module Cards
     property? hitting
     getter? bust
     getter? blackjack
+    property seat : Seat | Nil
 
     @dealing_card : Nil | Card
 
@@ -15,7 +15,7 @@ module Cards
     DEAL_DELAY = ACTION_DELAY
     DONE_DELAY = 1.69_f32
 
-    def initialize(@card_spots = [] of CardSpot, @cards = [] of Card)
+    def initialize(@seat : Seat | Nil = nil, @cards = [] of Card)
       @playing = false
       @played = false
       @done = false
@@ -52,8 +52,28 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      card_spots.each(&.draw(screen_x, screen_y))
       cards.each(&.draw(screen_x, screen_y))
+    end
+
+    def log_name
+      self.class.to_s.split("::").last
+    end
+
+    def log(method, message = "")
+      return unless Main::DEBUG
+      puts ">>> #{log_name}##{method}#{message.presence && " > #{message}"}"
+    end
+
+    def card_spots : Array(CardSpot)
+      if seat = @seat
+        seat.card_spots
+      else
+        [] of CardSpot
+      end
+    end
+
+    def unseated?
+      !@seat
     end
 
     def delay?
@@ -101,13 +121,13 @@ module Cards
     end
 
     def play
-      puts ">>> #{self.class}#play" if Main::DEBUG
+      log(:play)
       @playing = true
       hand_check
     end
 
     def hand_check
-      puts ">>> #{self.class}#hand_check, hand: #{hand_display} cards: #{cards.map(&.short_name)}" if Main::DEBUG
+      log(:hand_check, "hand: #{hand_display} cards: #{cards.map(&.short_name)}")
 
       hand = hand_value
 
@@ -123,7 +143,7 @@ module Cards
     end
 
     def play_done
-      puts ">>> #{self.class}#play_done" if Main::DEBUG
+      log(:play_done)
       @hitting = false
       @playing = false
       @played = true
@@ -131,41 +151,41 @@ module Cards
     end
 
     def stand
-      puts ">>> #{self.class}#stand" if Main::DEBUG
+      log(:stand)
       play_done if playing?
     end
 
     def hit
-      puts ">>> #{self.class}#hit" if Main::DEBUG
+      log(:hit)
       @hitting = true
       delay(action_delay)
     end
 
     def bust
-      puts ">>> #{self.class}#bust" if Main::DEBUG
+      log(:bust)
       @bust = true
       play_done if playing?
     end
 
     def twenty_one
-      puts ">>> #{self.class}#twenty_one" if Main::DEBUG
+      log(:twenty_one)
       play_done if playing?
     end
 
     def blackjack
-      puts ">>> #{self.class}#blackjack" if Main::DEBUG
+      log(:blackjack)
       @blackjack = true
       play_done if playing?
     end
 
     def done(_dealer : Dealer)
-      puts ">>> #{self.class}#done" if Main::DEBUG
+      log(:done)
       @done = true
       delay(deal_delay)
     end
 
     def new_hand
-      puts ">>> #{self.class}#new_hand" if Main::DEBUG
+      log(:new_hand)
 
       @hitting = false
       @playing = false

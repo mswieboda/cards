@@ -1,6 +1,7 @@
 module Cards
   class Manager
     property deck : Deck
+    getter seats : Array(Seat)
     getter seat_players : Array(SeatPlayer)
     getter players : Array(CardPlayer)
     getter dealer : Dealer
@@ -8,10 +9,18 @@ module Cards
     @deck_stack : Stack
     @discard_stack : Stack
 
-    def initialize(@deck, @seat_players = [] of SeatPlayer, @dealer = Dealer.new)
+    def initialize(@deck, @seats = [] of Seat, @seat_players = [] of SeatPlayer, @dealer = Dealer.new)
       @players = [] of CardPlayer
       @players += seat_players
       @players << @dealer
+
+      seats.each do |seat|
+        next if seat_players.any? { |p| p.seat == seat }
+
+        if player = seat_players.find(&.unseated?)
+          player.seat = seat
+        end
+      end
 
       @turn_index = 0
       @done_index = 0
@@ -36,6 +45,7 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
+      @seats.each(&.draw(screen_x, screen_y))
       seat_players.each(&.draw(screen_x, screen_y))
       dealer.draw(screen_x, screen_y)
       @deck_stack.draw(screen_x, screen_y)
