@@ -20,11 +20,12 @@ module Cards
       super(seat: seat)
     end
 
-    def deal(card : Card)
+    def draw(screen_x = 0, screen_y = 0)
       super
 
-      # make sure 2nd card gets double flipped for dealer, staying covered
-      card.flip if cards.size == 2 && !card.flipped?
+      if seat = @seat
+        seat.draw(screen_x, screen_y)
+      end
     end
 
     def update(_frame_time)
@@ -46,6 +47,13 @@ module Cards
           end
         end
       end
+    end
+
+    def deal(card : Card)
+      super
+
+      # make sure 2nd card gets double flipped for dealer, staying covered
+      card.flip if cards.size == 2 && !card.flipped?
     end
 
     def play(all_busted_or_blackjack)
