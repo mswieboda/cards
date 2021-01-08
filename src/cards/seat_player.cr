@@ -17,11 +17,9 @@ module Cards
     def draw(screen_x = 0, screen_y = 0)
       super
 
-      draw_chips(screen_x, screen_y)
-      draw_name(screen_x, screen_y)
-    end
-
-    def draw_chips(screen_x = 0, screen_y = 0)
+      last_y = draw_name(screen_x, screen_y)
+      last_y = draw_balance(screen_x, screen_y, last_y)
+      draw_chips(screen_x, screen_y, last_y)
     end
 
     def draw_name(screen_x = 0, screen_y = 0)
@@ -37,10 +35,35 @@ module Cards
         color: Game::Color::Black,
       )
 
-      text.x -= text.width / 2_f32
+      text.x -= (text.width / 2_f32).to_i
       text.y += CardSpot.margin + CardSpot.height
 
       text.draw
+
+      text.y + text.height
+    end
+
+    def draw_balance(screen_x = 0, screen_y = 0, y = 0)
+      mid_x = seat.x
+
+      text = Game::Text.new(
+        text: "balance: #{balance}",
+        x: screen_x + mid_x,
+        y: y,
+        size: 10,
+        spacing: 2,
+        color: Game::Color::Black,
+      )
+
+      text.x -= (text.width / 2_f32).to_i
+      text.y += (CardSpot.margin / 2_f32).to_i
+
+      text.draw
+
+      text.y + text.height
+    end
+
+    def draw_chips(screen_x = 0, screen_y = 0, y = 0)
     end
 
     def new_hand
@@ -113,6 +136,7 @@ module Cards
     def win(payout_ratio = 1)
       payout = payout_ratio * bet + bet
       log(:win, "#{payout}")
+      @message = "win"
 
       # add to balance
       @balance += payout
@@ -121,11 +145,13 @@ module Cards
     def lose
       # don't do anything, bet was already taken out of balance
       log(:lose, "(#{bet})")
+      @message = "lose"
     end
 
     def push
       payout = bet
       log(:push, "#{payout}")
+      @message = "push"
 
       @balance += payout
     end

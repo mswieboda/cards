@@ -8,6 +8,7 @@ module Cards
     getter? bust
     getter? blackjack
     property seat : Seat
+    getter message : String
 
     @dealing_card : Nil | Card
 
@@ -23,6 +24,7 @@ module Cards
       @blackjack = false
       @bust = false
       @elapsed_delay_time = @delay_time = 0_f32
+      @message = ""
     end
 
     def update(frame_time)
@@ -53,6 +55,52 @@ module Cards
 
     def draw(screen_x = 0, screen_y = 0)
       cards.each(&.draw(screen_x, screen_y))
+
+      last_y = draw_hand_display(screen_x, screen_y)
+      draw_message(screen_x, screen_y, last_y)
+    end
+
+    def draw_hand_display(screen_x = 0, screen_y = 0, y = seat.y)
+      hand = hand_display
+      hand = "" if hand == "0"
+
+      mid_x = seat.x
+
+      text = Game::Text.new(
+        text: hand,
+        x: screen_x + mid_x,
+        y: screen_y + y,
+        size: 10,
+        spacing: 2,
+        color: Game::Color::Black,
+      )
+
+      text.x -= (text.width / 2_f32).to_i
+      text.y -= CardSpot.margin + text.height
+
+      text.draw
+
+      text.y
+    end
+
+    def draw_message(screen_x = 0, screen_y = 0, y = 0)
+      return if message.empty?
+
+      mid_x = seat.x
+
+      text = Game::Text.new(
+        text: message,
+        x: screen_x + mid_x,
+        y: screen_y + y,
+        size: 10,
+        spacing: 2,
+        color: Game::Color::Black,
+      )
+
+      text.x -= (text.width / 2_f32).to_i
+      text.y -= CardSpot.margin + text.height
+
+      text.draw
     end
 
     def log_name
@@ -164,6 +212,7 @@ module Cards
     def bust
       log(:bust)
       @bust = true
+      @message = "bust"
       play_done if playing?
     end
 
@@ -175,6 +224,7 @@ module Cards
     def blackjack
       log(:blackjack)
       @blackjack = true
+      @message = "blackjack"
       play_done if playing?
     end
 
@@ -186,6 +236,7 @@ module Cards
 
     def new_hand
       log(:new_hand)
+      @message = ""
 
       @hitting = false
       @playing = false

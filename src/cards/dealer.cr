@@ -20,6 +20,12 @@ module Cards
       super
     end
 
+    def draw_hand_display(screen_x = 0, screen_y = 0, y = seat.y)
+      return y unless playing? || played?
+
+      super
+    end
+
     def update(_frame_time)
       return unless super
 
