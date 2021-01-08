@@ -14,21 +14,26 @@ module Cards
 
       seats = [] of Seat
       seats << Seat.new(
-        x: SIDE_MARGIN + CardSpot.width + CardSpot.margin,
+        x: Main.screen_width - SIDE_MARGIN - CardSpot.width - CardSpot.margin,
         y: Main.screen_height / 2_f32
       )
-      seats << Seat.new(
+      mid_seat = Seat.new(
         x: Main.screen_width / 2_f32,
         y: Main.screen_height / 2_f32
       )
+      seats << mid_seat
       seats << Seat.new(
-        x: Main.screen_width - SIDE_MARGIN - CardSpot.width - CardSpot.margin,
+        x: SIDE_MARGIN + CardSpot.width + CardSpot.margin,
         y: Main.screen_height / 2_f32
       )
 
       seat_players = [] of SeatPlayer
+
+      player = Player.new(name: "Matt", seat: mid_seat, balance: 300)
+      mid_seat.player = player
+      seat_players << player
+
       seat_players << CpuPlayer.new(name: "Tyler", balance: 300)
-      seat_players << Player.new(name: "Matt", seat: seats[1], balance: 300)
       seat_players << CpuPlayer.new(name: "Jack", balance: 300)
 
       @manager = Manager.new(seats: seats, deck: deck, seat_players: seat_players)

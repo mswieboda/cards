@@ -7,7 +7,7 @@ module Cards
     property? hitting
     getter? bust
     getter? blackjack
-    property seat : Seat | Nil
+    property seat : Seat
 
     @dealing_card : Nil | Card
 
@@ -15,7 +15,7 @@ module Cards
     DEAL_DELAY = ACTION_DELAY
     DONE_DELAY = 1.69_f32
 
-    def initialize(@seat : Seat | Nil = nil, @cards = [] of Card)
+    def initialize(@seat = Seat.new, @cards = [] of Card)
       @playing = false
       @played = false
       @done = false
@@ -73,7 +73,7 @@ module Cards
     end
 
     def unseated?
-      !@seat
+      @seat.no_seat?
     end
 
     def delay?

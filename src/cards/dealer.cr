@@ -15,9 +15,7 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      if seat = @seat
-        seat.draw(screen_x, screen_y)
-      end
+      seat.draw(screen_x, screen_y)
 
       super
     end

@@ -6,12 +6,41 @@ module Cards
     getter? placed_bet
     getter? leave_table
 
-    def initialize(@name = "", seat : Seat | Nil = nil, @balance = 0)
+    def initialize(@name = "", seat = Seat.new, @balance = 0)
       super(seat: seat)
 
       @bet = 0
       @placed_bet = false
       @leave_table = false
+    end
+
+    def draw(screen_x = 0, screen_y = 0)
+      super
+
+      draw_chips(screen_x, screen_y)
+      draw_name(screen_x, screen_y)
+    end
+
+    def draw_chips(screen_x = 0, screen_y = 0)
+    end
+
+    def draw_name(screen_x = 0, screen_y = 0)
+      mid_x = seat.x
+      y = seat.y
+
+      text = Game::Text.new(
+        text: name,
+        x: screen_x + mid_x,
+        y: screen_y + y,
+        size: 10,
+        spacing: 2,
+        color: Game::Color::Black,
+      )
+
+      text.x -= text.width / 2_f32
+      text.y += CardSpot.margin + CardSpot.height
+
+      text.draw
     end
 
     def new_hand

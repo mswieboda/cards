@@ -9,18 +9,26 @@ module Cards
     @deck_stack : Stack
     @discard_stack : Stack
 
-    def initialize(@deck, @seats = [] of Seat, @seat_players = [] of SeatPlayer, @dealer = Dealer.new)
+    def initialize(@deck, @seats = [] of Seat, seat_players = [] of SeatPlayer, @dealer = Dealer.new)
       @players = [] of CardPlayer
-      @players += seat_players
-      @players << @dealer
+      @seat_players = [] of SeatPlayer
 
       seats.each do |seat|
-        next if seat_players.any? { |p| p.seat == seat }
+        if seat.player?
+          if player = seat_players.find { |p| p == seat.player }
+            @seat_players << player
+          end
+          next
+        end
 
         if player = seat_players.find(&.unseated?)
           player.seat = seat
+          @seat_players << player
         end
       end
+
+      @players += @seat_players
+      @players << @dealer
 
       @turn_index = 0
       @done_index = 0
