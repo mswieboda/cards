@@ -28,15 +28,15 @@ module Cards
 
       text = Game::Text.new(
         text: name,
-        x: screen_x + mid_x,
-        y: screen_y + y,
+        x: (screen_x + mid_x).to_i,
+        y: (screen_y + y).to_i,
         size: 10,
         spacing: 2,
         color: Game::Color::Black,
       )
 
       text.x -= (text.width / 2_f32).to_i
-      text.y += CardSpot.margin + CardSpot.height
+      text.y += (CardSpot.margin + CardSpot.height).to_i
 
       text.draw
 
@@ -48,8 +48,8 @@ module Cards
 
       text = Game::Text.new(
         text: "balance: #{balance}",
-        x: screen_x + mid_x,
-        y: y,
+        x: (screen_x + mid_x).to_i,
+        y: y.to_i,
         size: 10,
         spacing: 2,
         color: Game::Color::Black,

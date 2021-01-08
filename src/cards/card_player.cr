@@ -66,17 +66,18 @@ module Cards
 
       mid_x = seat.x
 
+
       text = Game::Text.new(
         text: hand,
-        x: screen_x + mid_x,
-        y: screen_y + y,
+        x: (screen_x + mid_x).to_i,
+        y: y.to_i,
         size: 10,
         spacing: 2,
         color: Game::Color::Black,
       )
 
       text.x -= (text.width / 2_f32).to_i
-      text.y -= CardSpot.margin + text.height
+      text.y -= (CardSpot.margin + text.height).to_i
 
       text.draw
 
@@ -90,15 +91,15 @@ module Cards
 
       text = Game::Text.new(
         text: message,
-        x: screen_x + mid_x,
-        y: screen_y + y,
+        x: (screen_x + mid_x).to_i,
+        y: y.to_i,
         size: 10,
         spacing: 2,
         color: Game::Color::Black,
       )
 
       text.x -= (text.width / 2_f32).to_i
-      text.y -= CardSpot.margin + text.height
+      text.y -= (CardSpot.margin + text.height).to_i
 
       text.draw
     end

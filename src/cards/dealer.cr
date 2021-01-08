@@ -21,7 +21,25 @@ module Cards
     end
 
     def draw_hand_display(screen_x = 0, screen_y = 0, y = seat.y)
-      return y unless playing? || played?
+      unless playing? || played?
+        mid_x = seat.x
+
+        text = Game::Text.new(
+          text: "",
+          x: (screen_x + mid_x).to_i,
+          y: y.to_i,
+          size: 10,
+          spacing: 2,
+          color: Game::Color::Black,
+        )
+
+        text.x -= (text.width / 2_f32).to_i
+        text.y -= (CardSpot.margin + text.height).to_i
+
+        text.draw
+
+        return text.y
+      end
 
       super
     end
