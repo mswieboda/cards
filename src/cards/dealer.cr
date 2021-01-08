@@ -21,11 +21,11 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      super
-
       if seat = @seat
         seat.draw(screen_x, screen_y)
       end
+
+      super
     end
 
     def update(_frame_time)
