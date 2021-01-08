@@ -6,16 +6,10 @@ module Cards
     DONE_DELAY = 1.69_f32
 
     def initialize
-      seat = Seat.new(card_spots: [
-        CardSpot.new(
-          x: Main.screen_width / 2_f32 - CardSpot.width - CardSpot.margin / 2_f32,
-          y: Main.screen_height / CARD_SPOT_Y_RATIO - CardSpot.height / 2_f32
-        ),
-        CardSpot.new(
-          x: Main.screen_width / 2_f32 + CardSpot.margin / 2_f32,
-          y: Main.screen_height / CARD_SPOT_Y_RATIO - CardSpot.height / 2_f32
-        )
-      ])
+      seat = Seat.new(
+        x: Main.screen_width / 2_f32,
+        y: Main.screen_height / CARD_SPOT_Y_RATIO
+      )
 
       super(seat: seat)
     end
