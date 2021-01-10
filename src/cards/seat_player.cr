@@ -64,6 +64,23 @@ module Cards
     end
 
     def draw_chips(screen_x = 0, screen_y = 0, y = 0)
+      mid_x = seat.x
+
+      text = Game::Text.new(
+        text: "bet: #{bet}",
+        x: (screen_x + mid_x).to_i,
+        y: y.to_i,
+        size: 10,
+        spacing: 2,
+        color: Game::Color::Black,
+      )
+
+      text.x -= (text.width / 2_f32).to_i
+      text.y += (CardSpot.margin / 2_f32).to_i
+
+      text.draw
+
+      text.y + text.height
     end
 
     def new_hand
