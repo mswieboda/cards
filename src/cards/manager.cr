@@ -6,8 +6,8 @@ module Cards
     getter players : Array(CardPlayer)
     getter dealer : Dealer
 
-    @deck_stack : Stack
-    @discard_stack : Stack
+    @deck_stack : CardStack
+    @discard_stack : CardStack
 
     def initialize(@deck, @seats = [] of Seat, seat_players = [] of SeatPlayer, @dealer = Dealer.new)
       @players = [] of CardPlayer
@@ -33,12 +33,12 @@ module Cards
       @turn_index = 0
       @done_index = 0
 
-      @deck_stack = Stack.new(
+      @deck_stack = CardStack.new(
         x: Main.screen_width - Card.width - CardSpot.margin,
         y: CardSpot.margin,
         cards: @deck.cards.dup
       )
-      @discard_stack = Stack.new(
+      @discard_stack = CardStack.new(
         x: CardSpot.margin,
         y: CardSpot.margin
       )

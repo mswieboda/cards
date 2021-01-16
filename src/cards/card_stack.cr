@@ -1,5 +1,5 @@
 module Cards
-  class Stack
+  class CardStack
     property position : Game::Vector
     property cards : Array(Card)
 
