@@ -50,6 +50,18 @@ module Cards
           height: 64,
           loops: false,
         },
+        :chip_accent => {
+          filename: "../assets/chip_accent.png",
+          width: 32,
+          height: 16,
+          loops: false
+        },
+        :chip_color => {
+          filename: "../assets/chip_color.png",
+          width: 32,
+          height: 16,
+          loops: false
+        }
       })
     end
 

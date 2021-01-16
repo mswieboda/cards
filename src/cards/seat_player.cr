@@ -80,6 +80,20 @@ module Cards
 
       text.draw
 
+      # drawing chips testing
+      # how many chips are we drawing?
+      chips = 3
+
+      y = (text.y + text.height).to_i
+
+      chips.times do |n|
+        # draw the bottom one (farthest in y) first
+        chip = Chip.new
+        chip.position.x = text.x.to_i
+        chip.position.y = y + (chips - n) * Chip.height_depth
+        chip.draw(screen_x, screen_y)
+      end
+
       text.y + text.height
     end
 
