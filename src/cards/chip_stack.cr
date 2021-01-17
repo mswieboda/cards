@@ -1,11 +1,11 @@
 module Cards
   class ChipStack
     property chips : Array(Chip)
+    getter position : Game::Vector
 
-    delegate :x, :y, to: @position
+    delegate :x, :y, to: position
     delegate :size, to: chips
 
-    @position : Game::Vector
     @move_to : Nil | Game::Vector
     @move_delta : Game::Vector
 
@@ -37,7 +37,7 @@ module Cards
 
     def move(move_to : Game::Vector)
       @move_to = move_to.copy
-      @move_delta = move_to.subtract(@position) / MOVEMENT_FRAMES
+      @move_delta = move_to.subtract(position) / MOVEMENT_FRAMES
     end
 
     def x=(value : Int32 | Float32)
@@ -62,7 +62,7 @@ module Cards
     end
 
     def add(chip : Chip)
-      last = @chips[-1]
+      last = @chips[-1] unless @chips.empty?
 
       @chips << chip
 
@@ -71,6 +71,15 @@ module Cards
           chip.frame = rand(chip.frames)
         end
       end
+
+      update_chips_position
+    end
+
+    def add_chip_position
+      Game::Vector.new(
+        x: x,
+        y: y - @chips.size * Chip.height_depth
+      )
     end
 
     def update_chips_position
@@ -78,6 +87,10 @@ module Cards
         chip.position.x = x
         chip.position.y = y - index * Chip.height_depth
       end
+    end
+
+    def chip_value
+      @chips.map(&.value).sum
     end
 
     def update(frame_time)

@@ -1,7 +1,6 @@
 module Cards
   class Chip
     property position : Game::Vector
-    property value : Value
 
     delegate :x, :y, to: position
     delegate :frame, :frames, to: @sprite
@@ -9,6 +8,7 @@ module Cards
     @sprite : Game::Sprite
     @move_to : Nil | Game::Vector
     @move_delta : Game::Vector
+    @value : Value
 
     WIDTH = 32
     HEIGHT = 16
@@ -110,6 +110,10 @@ module Cards
       @sprite_accent.frame = frame
     end
 
+    def value
+      @value.value
+    end
+
     def update(frame_time)
       if moving?
         if move_to = @move_to
@@ -134,8 +138,8 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: value.color)
-      @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: value.color_accent)
+      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: @value.color)
+      @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: @value.color_accent)
     end
   end
 end

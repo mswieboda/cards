@@ -19,22 +19,19 @@ module Cards
       Chip::Value.values.map { |value| BetChip.new(value: value) }
     end
 
+    def to_chip : Chip
+      chip = Chip.new(value: @value)
+      chip.position = position.copy
+      chip
+    end
+
     def update(frame_time)
       @hovered = Game::Mouse.in?(x: x, y: y, width: width, height: height)
       @selected = hovered? && Game::Mouse::Left.pressed?
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      @sprite.draw(
-        x: screen_x + x,
-        y: screen_y + y,
-        tint: value.color
-      )
-      @sprite_accent.draw(
-        x: screen_x + x,
-        y: screen_y + y,
-        tint: value.color_accent
-      )
+      super
 
       if hovered?
         @sprite_highlight.draw(
