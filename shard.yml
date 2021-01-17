@@ -15,4 +15,4 @@ license: MIT
 dependencies:
   game:
     github: mswieboda/game
-    version: 0.2.20
+    version: 0.2.21

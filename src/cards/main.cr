@@ -61,6 +61,12 @@ module Cards
           width: 32,
           height: 16,
           loops: false
+        },
+        :chip_highlight => {
+          filename: "../assets/chip_highlight.png",
+          width: 38,
+          height: 22,
+          loops: false
         }
       })
     end

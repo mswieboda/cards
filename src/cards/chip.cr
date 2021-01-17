@@ -63,6 +63,10 @@ module Cards
       @move_delta = Game::Vector.new
     end
 
+    def self.values : Array(Chip)
+      Chip::Value.values.map { |value| Chip.new(value: value) }
+    end
+
     def self.width
       WIDTH
     end
