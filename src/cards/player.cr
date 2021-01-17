@@ -12,6 +12,11 @@ module Cards
       @chips = [] of Chip
     end
 
+    def new_hand
+      super
+
+      @chip_stack.chips.clear
+    end
 
     def update(frame_time)
       return unless super
@@ -22,28 +27,26 @@ module Cards
         elsif Game::Key::Enter.pressed?
           hit
         end
-      elsif !placed_bet?
+      elsif !confirmed_bet?
         @bet_ui.update(frame_time)
         @chips.each(&.update(frame_time))
 
         if chip = @bet_ui.chip
-          @placing_bet = true
-          chip.move(@chip_stack.add_chip_position)
-          @chips << chip
+          if place_bet(chip.value)
+            @placing_bet = true
+            chip.move(@chip_stack.add_chip_position)
+            @chips << chip
+          end
         end
 
         @chips.select(&.moved?).each do |chip|
-          @bet += chip.value
           @chips.delete(chip)
           @chip_stack.add(chip)
         end
 
         @placing_bet = false if @chips.empty?
 
-        if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
-          # TODO: impl chips, player bet changing, for now bet 1
-          place_bet(@bet)
-        end
+        confirm_bet if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
       end
     end
 

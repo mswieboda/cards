@@ -3,18 +3,23 @@ require "./seat_player"
 module Cards
   class CpuPlayer < SeatPlayer
     MIN_BALANCE = 5
+    BET = 5
 
     def update(_frame_time)
       return unless super
 
-      if placed_bet?
-        if placing_bet?
-          # check if bet is done being placed
-          @placing_bet = false
+      unless confirmed_bet?
+        unless placing_bet?
+          if place_bet(BET)
+            # TODO: add chip to chip stack, etc
+            @placing_bet = false
+            confirm_bet
+          else
+            # means they don't have enough balance for the bet, stop placing
+            @placing_bet = false
+            confirm_bet
+          end
         end
-      else
-        # TODO: randomize cpu betting, and base off of balance, etc
-        place_bet
       end
 
       if playing?
@@ -29,13 +34,11 @@ module Cards
       end
     end
 
-    def place_bet(bet = 1)
+    def confirm_bet
       super
 
-      @placing_bet = true
-
       # means they don't have enough balance for the bet
-      unless placed_bet?
+      unless confirmed_bet?
         if balance <= MIN_BALANCE
           leave_table
         end

@@ -1,6 +1,6 @@
 module Cards
   class ChipStack
-    property chips : Array(Chip)
+    getter chips : Array(Chip)
     getter position : Game::Vector
 
     delegate :x, :y, to: position

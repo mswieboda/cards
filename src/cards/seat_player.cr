@@ -4,7 +4,7 @@ module Cards
     getter balance : Int32 | Float32
     getter bet : Int32 | Float32
     getter? placing_bet
-    getter? placed_bet
+    getter? confirmed_bet
     getter? leave_table
 
     @chip_stack : ChipStack
@@ -14,7 +14,7 @@ module Cards
 
       @bet = 0
       @placing_bet = false
-      @placed_bet = false
+      @confirmed_bet = false
       @leave_table = false
 
       @chip_stack = ChipStack.new(
@@ -104,25 +104,39 @@ module Cards
     def new_hand
       super
 
-      @placed_bet = false
+      @confirmed_bet = false
+      @placing_bet = false
+      @bet = 0
     end
 
     def log_name
       "#{name} #{super}"
     end
 
-    def place_bet(bet = 1)
+    def place_bet(bet = 1) : Bool
       log(:place_bet, "balance: #{balance} bet: #{bet}")
 
-      @bet = bet
-
-      if @balance - @bet >= 0
-        @balance -= @bet
+      if balance - bet >= 0
+        @bet += bet
+        @balance -= bet
         log(:place_bet, "placed bet: #{bet} new balance: #{balance}")
-        @placed_bet = true
+        true
       else
         # message to decrease bet, or buy in to increase balance
-        log(:place_bet, "not enough chips, balance: #{@balance} bet: #{@bet}")
+        log(:place_bet, "not enough chips, balance: #{balance} bet: #{bet}")
+        false
+      end
+    end
+
+    def confirm_bet
+      log(:confirm_bet, "balance: #{balance} bet: #{bet}")
+
+      if bet > 0 && balance >= 0
+        log(:confirm_bet, "confirmed bet: #{bet} balance: #{balance}")
+        @confirmed_bet = true
+      else
+        # message to decrease bet, or buy in to increase balance
+        log(:confirm_bet, "not enough chips, balance: #{balance} bet: #{bet}")
       end
     end
 
@@ -192,6 +206,7 @@ module Cards
     end
 
     def leave_table
+      log(:leave_table)
       @leave_table = true
     end
   end
