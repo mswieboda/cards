@@ -5,6 +5,8 @@ module Cards
     ACTION_DELAY = 0.69_f32
     DONE_DELAY = 1.69_f32
 
+    @chip_trays : Array(ChipTray)
+
     def initialize
       seat = Seat.new(
         x: Main.screen_width / 2_f32,
@@ -12,9 +14,19 @@ module Cards
       )
 
       super(seat: seat)
+
+      @chip_trays = Chip.values.map_with_index do |chip, index|
+        start_x = seat.x - Chip.values.size / 2_f32 * (Chip.width + CardSpot.margin)
+        ChipTray.new(
+          x: start_x + index * (Chip.width + CardSpot.margin),
+          y: CardSpot.margin,
+          chips: [chip]
+        )
+      end
     end
 
     def draw(screen_x = 0, screen_y = 0)
+      @chip_trays.each(&.draw(screen_x, screen_y))
       seat.draw(screen_x, screen_y)
 
       super

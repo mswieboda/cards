@@ -23,10 +23,6 @@ module Cards
       update_chips_position
     end
 
-    def update(frame_time)
-      chips.each(&.update(frame_time))
-    end
-
     def moving?
       !!@move_to
     end
@@ -52,10 +48,12 @@ module Cards
 
     def init_chip_frames
       @chips.each_with_index do |chip, index|
-        # ensure chip frame isn't same as last (TODO: or next chip)
-        if last = @chips[index - 1]
-          while chip.frame == last.frame
-            chip.frame = rand(chip.frames)
+        if @chips.size > 1
+          # ensure chip frame isn't same as last
+          if last = @chips[index - 1]
+            while chip.frame == last.frame
+              chip.frame = rand(chip.frames)
+            end
           end
         end
       end
