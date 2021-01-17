@@ -16,7 +16,7 @@ module Cards
       super(seat: seat)
 
       @chip_trays = Chip.values.map_with_index do |chip, index|
-        start_x = seat.x - Chip.values.size / 2_f32 * (Chip.width + CardSpot.margin)
+        start_x = seat.x - Chip.values.size / 2_f32 * (Chip.width + CardSpot.margin) + CardSpot.margin / 2_f32
         ChipTray.new(
           x: start_x + index * (Chip.width + CardSpot.margin),
           y: CardSpot.margin,
