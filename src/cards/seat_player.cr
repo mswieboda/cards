@@ -6,25 +6,39 @@ module Cards
     getter? placed_bet
     getter? leave_table
 
+    @chip_stack : ChipStack
+
     def initialize(@name = "", seat = Seat.new, @balance = 0)
       super(seat: seat)
 
       @bet = 0
       @placed_bet = false
       @leave_table = false
+
+      # TODO: draw chips testing
+      @chip_stack = ChipStack.new(
+        chips: [
+          Chip.new(color: Game::Color::Black),
+          Chip.new(color: Game::Color::Blue),
+          Chip.new(color: Game::Color::Green),
+          Chip.new(color: Game::Color::Red),
+          Chip.new(color: Game::Color::Red),
+          Chip.new(color: Game::Color::Red)
+        ]
+      )
     end
 
     def draw(screen_x = 0, screen_y = 0)
       super
 
-      last_y = draw_name(screen_x, screen_y)
+      last_y = seat.y + CardSpot.height + CardSpot.margin
+      last_y = draw_chips(screen_x, screen_y, last_y)
+      last_y = draw_name(screen_x, screen_y, last_y)
       last_y = draw_balance(screen_x, screen_y, last_y)
-      draw_chips(screen_x, screen_y, last_y)
     end
 
-    def draw_name(screen_x = 0, screen_y = 0)
+    def draw_name(screen_x = 0, screen_y = 0, y = 0)
       mid_x = seat.x
-      y = seat.y
 
       text = Game::Text.new(
         text: name,
@@ -36,7 +50,7 @@ module Cards
       )
 
       text.x -= (text.width / 2_f32).to_i
-      text.y += (CardSpot.margin + CardSpot.height).to_i
+      text.y += (CardSpot.margin / 2_f32).to_i
 
       text.draw
 
@@ -49,7 +63,7 @@ module Cards
       text = Game::Text.new(
         text: "balance: #{balance}",
         x: (screen_x + mid_x).to_i,
-        y: y.to_i,
+        y: (screen_y + y).to_i,
         size: 10,
         spacing: 2,
         color: Game::Color::Black,
@@ -65,34 +79,25 @@ module Cards
 
     def draw_chips(screen_x = 0, screen_y = 0, y = 0)
       mid_x = seat.x
+      y += (CardSpot.margin / 2_f32) + @chip_stack.size * Chip.height_depth
+      @chip_stack.x = mid_x - Chip.width / 2_f32
+      @chip_stack.y = y
+      @chip_stack.draw(screen_x, screen_y)
+
+      y = @chip_stack.y + Chip.height + (CardSpot.margin / 2_f32).to_i
 
       text = Game::Text.new(
         text: "bet: #{bet}",
         x: (screen_x + mid_x).to_i,
-        y: y.to_i,
+        y: (screen_y + y).to_i,
         size: 10,
         spacing: 2,
         color: Game::Color::Black,
       )
 
       text.x -= (text.width / 2_f32).to_i
-      text.y += (CardSpot.margin / 2_f32).to_i
 
       text.draw
-
-      # drawing chips testing
-      # how many chips are we drawing?
-      chips = 3
-
-      y = (text.y + text.height).to_i
-
-      chips.times do |n|
-        # draw the bottom one (farthest in y) first
-        chip = Chip.new
-        chip.position.x = text.x.to_i
-        chip.position.y = y + (chips - n) * Chip.height_depth
-        chip.draw(screen_x, screen_y)
-      end
 
       text.y + text.height
     end

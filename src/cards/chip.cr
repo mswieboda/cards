@@ -4,6 +4,7 @@ module Cards
     property color : Game::Color
 
     delegate :x, :y, to: position
+    delegate :frame, :frames, to: @sprite
 
     @sprite : Game::Sprite
     @move_to : Nil | Game::Vector
@@ -18,6 +19,11 @@ module Cards
     def initialize(@color = Game::Color::Red)
       @sprite = Game::Sprite.get(:chip_color)
       @sprite_accent = Game::Sprite.get(:chip_accent)
+
+      frame = rand(@sprite.frames)
+      @sprite.frame = frame
+      @sprite_accent.frame = frame
+
       @position = Game::Vector.new
       @move_to = nil
       @move_delta = Game::Vector.new
@@ -59,6 +65,11 @@ module Cards
     def move(move_to : Game::Vector)
       @move_to = move_to.copy
       @move_delta = move_to.subtract(position) / MOVEMENT_FRAMES
+    end
+
+    def frame=(frame : Int32)
+      @sprite.frame = frame
+      @sprite_accent.frame = frame
     end
 
     def update(frame_time)
