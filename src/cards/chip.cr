@@ -1,7 +1,7 @@
 module Cards
   class Chip
     property position : Game::Vector
-    property color : Game::Color
+    property value : Value
 
     delegate :x, :y, to: position
     delegate :frame, :frames, to: @sprite
@@ -16,7 +16,41 @@ module Cards
 
     MOVEMENT_FRAMES = 15
 
-    def initialize(@color = Game::Color::Red)
+    enum Value : UInt8
+      One = 1
+      Five = 5
+      Twenty = 20
+      Fifty = 50
+      Hundred = 100
+
+      def color
+        case self
+        when One
+          Game::Color::White
+        when Five
+          Game::Color::Red
+        when Twenty
+          Game::Color::Green
+        when Fifty
+          Game::Color::Blue
+        when Hundred
+          Game::Color.new(color: 33)
+        else
+          raise "Chip::Value#color error value not found: #{self}"
+        end
+      end
+
+      def color_accent
+        case self
+        when One
+          Game::Color.new(color: 33)
+        else
+          Game::Color::White
+        end
+      end
+    end
+
+    def initialize(@value = Value::Five)
       @sprite = Game::Sprite.get(:chip_color)
       @sprite_accent = Game::Sprite.get(:chip_accent)
 
@@ -96,8 +130,8 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: color)
-      @sprite_accent.draw(x: screen_x + x, y: screen_y + y)
+      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: value.color)
+      @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: value.color_accent)
     end
   end
 end

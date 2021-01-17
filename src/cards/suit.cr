@@ -31,7 +31,7 @@ module Cards
 
     def color
       case self
-      when .in?(Suit::Diamonds, Suit::Hearts)
+      when .in?(Diamonds, Hearts)
         Game::Color::Red
       else
         Game::Color::Black

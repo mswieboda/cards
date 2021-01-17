@@ -24,12 +24,12 @@ module Cards
     end
 
     def face?
-      in?(Rank::Jack, Rank::Queen, Rank::King)
+      in?(Jack, Queen, King)
     end
 
     def short_name
       case self
-      when Rank::Joker
+      when Joker
         "JKR"
       when .numeral?
         value.to_s

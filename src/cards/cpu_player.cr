@@ -8,6 +8,10 @@ module Cards
       return unless super
 
       if placed_bet?
+        if placing_bet?
+          # check if bet is done being placed
+          @placing_bet = false
+        end
       else
         # TODO: randomize cpu betting, and base off of balance, etc
         place_bet
@@ -27,6 +31,8 @@ module Cards
 
     def place_bet(bet = 1)
       super
+
+      @placing_bet = true
 
       # means they don't have enough balance for the bet
       unless placed_bet?

@@ -97,7 +97,7 @@ module Cards
     end
 
     def bets_ready?
-      seat_players.all?(&.placed_bet?)
+      seat_players.none?(&.placing_bet?) && seat_players.all?(&.placed_bet?)
     end
 
     def play_hand?
