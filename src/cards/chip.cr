@@ -1,22 +1,25 @@
 module Cards
   class Chip
     property position : Game::Vector
+    getter amount : Amount
 
     delegate :x, :y, to: position
     delegate :frame, :frames, to: @sprite
+    delegate :value, to: @amount
 
     @sprite : Game::Sprite
+    @sprite_accent : Game::Sprite
     @move_to : Nil | Game::Vector
     @move_delta : Game::Vector
-    @value : Value
 
     WIDTH = 32
     HEIGHT = 16
     HEIGHT_DEPTH = 3
 
-    MOVEMENT_FRAMES = 15
+    # MOVEMENT_FRAMES = 15
+    MOVEMENT_FRAMES = 30
 
-    enum Value : UInt8
+    enum Amount : UInt8
       One = 1
       Five = 5
       Twenty = 20
@@ -36,7 +39,7 @@ module Cards
         when Hundred
           Game::Color.new(color: 33)
         else
-          raise "Chip::Value#color error value not found: #{self}"
+          raise "Chip::Amount#color error amount not found: #{self}"
         end
       end
 
@@ -48,9 +51,13 @@ module Cards
           Game::Color::White
         end
       end
+
+      def to_chip
+        Chip.new(amount: self)
+      end
     end
 
-    def initialize(@value = Value::Five)
+    def initialize(@amount = Amount::Five)
       @sprite = Game::Sprite.get(:chip_color)
       @sprite_accent = Game::Sprite.get(:chip_accent)
 
@@ -63,8 +70,14 @@ module Cards
       @move_delta = Game::Vector.new
     end
 
-    def self.values : Array(Chip)
-      Chip::Value.values.map { |value| Chip.new(value: value) }
+    def self.amounts : Array(Chip)
+      Chip::Amount.values.map { |amount| amount.to_chip }
+    end
+
+    def self.largest(total : Int32 | Float32) : Chip | Nil
+      if amount = Chip::Amount.values.reverse.find { |amount| amount.value <= total }
+        amount.to_chip
+      end
     end
 
     def self.width
@@ -110,10 +123,6 @@ module Cards
       @sprite_accent.frame = frame
     end
 
-    def value
-      @value.value
-    end
-
     def update(frame_time)
       if moving?
         if move_to = @move_to
@@ -138,8 +147,8 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: @value.color)
-      @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: @value.color_accent)
+      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color)
+      @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color_accent)
     end
   end
 end

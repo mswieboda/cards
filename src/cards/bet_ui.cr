@@ -13,7 +13,7 @@ module Cards
         y: Main.screen_height - Chip.height - CardSpot.margin / 2_f32
       )
 
-      @bet_chips = BetChip.values
+      @bet_chips = BetChip.amounts
       @bet_chips.each_with_index do |chip, index|
         start_x = x - @bet_chips.size / 2_f32 * (Chip.width + CardSpot.margin) + CardSpot.margin / 2_f32
         chip.position.x = start_x + index * (Chip.width + CardSpot.margin)

@@ -9,6 +9,7 @@ module Cards
     getter? blackjack
     property seat : Seat
     getter message : String
+    getter? clearing_table
 
     @dealing_card : Nil | Card
 
@@ -25,6 +26,7 @@ module Cards
       @bust = false
       @elapsed_delay_time = @delay_time = 0_f32
       @message = ""
+      @clearing_table = false
     end
 
     def update(frame_time)
@@ -45,12 +47,7 @@ module Cards
           @elapsed_delay_time = 0_f32
           @delay_time = 0_f32
         end
-
-        return false
       end
-
-      # used to avoid early exit (from delay) in child classes
-      true
     end
 
     def draw(screen_x = 0, screen_y = 0)
@@ -155,6 +152,8 @@ module Cards
     end
 
     def deal(card : Card)
+      log(:deal)
+
       card.flip if card.flipped?
 
       position = card_spots[[cards.size, card_spots.size - 1].min].position.copy
@@ -207,7 +206,6 @@ module Cards
     def hit
       log(:hit)
       @hitting = true
-      delay(action_delay)
     end
 
     def bust
@@ -233,6 +231,27 @@ module Cards
       log(:done)
       @done = true
       delay(deal_delay)
+    end
+
+    def cleared_table?
+      cards.empty?
+    end
+
+    def clearing_table(discard_stack : CardStack, _dealer : Dealer)
+      unless clearing_table?
+        # discard all cards at once
+        cards.each do |card|
+          card.move(discard_stack.position)
+        end
+
+        @clearing_table = true
+      else
+        # clear cards
+        cards.select(&.moved?).each do |card|
+          cards.delete(card)
+          discard_stack.add(card)
+        end
+      end
     end
 
     def new_hand

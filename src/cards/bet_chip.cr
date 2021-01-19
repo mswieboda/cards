@@ -7,7 +7,7 @@ module Cards
 
     @sprite_highlight : Game::Sprite
 
-    def initialize(value = Value::Five)
+    def initialize(amount = Amount::Five)
       super
 
       @hovered = false
@@ -15,12 +15,12 @@ module Cards
       @sprite_highlight = Game::Sprite.get(:chip_highlight)
     end
 
-    def self.values : Array(BetChip)
-      Chip::Value.values.map { |value| BetChip.new(value: value) }
+    def self.amounts : Array(BetChip)
+      Chip::Amount.values.map { |amount| BetChip.new(amount: amount) }
     end
 
     def to_chip : Chip
-      chip = Chip.new(value: @value)
+      chip = Chip.new(amount: @amount)
       chip.position = position.copy
       chip
     end

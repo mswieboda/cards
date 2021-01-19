@@ -1,11 +1,11 @@
 module Cards
   class Dealer < CardPlayer
+    getter chip_trays : Array(ChipTray)
+
     CARD_SPOT_Y_RATIO = 6_f32
 
     ACTION_DELAY = 0.69_f32
     DONE_DELAY = 1.69_f32
-
-    @chip_trays : Array(ChipTray)
 
     def initialize
       seat = Seat.new(
@@ -15,12 +15,12 @@ module Cards
 
       super(seat: seat)
 
-      @chip_trays = Chip.values.map_with_index do |chip, index|
-        start_x = seat.x - Chip.values.size / 2_f32 * (Chip.width + CardSpot.margin) + CardSpot.margin / 2_f32
+      @chip_trays = Chip::Amount.values.map_with_index do |amount, index|
+        start_x = seat.x - Chip::Amount.values.size / 2_f32 * (Chip.width + CardSpot.margin) + CardSpot.margin / 2_f32
         ChipTray.new(
           x: start_x + index * (Chip.width + CardSpot.margin),
           y: CardSpot.margin,
-          chips: [chip]
+          amount: amount
         )
       end
     end
@@ -57,7 +57,9 @@ module Cards
     end
 
     def update(_frame_time)
-      return unless super
+      super
+
+      return if delay?
 
       if playing? && !hitting?
         if card = cards[1]

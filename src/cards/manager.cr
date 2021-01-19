@@ -43,7 +43,7 @@ module Cards
         y: CardSpot.margin
       )
 
-      @deck_stack.shuffle!
+      # @deck_stack.shuffle!
     end
 
     def update(frame_time)
@@ -133,14 +133,10 @@ module Cards
 
     def done(player : CardPlayer)
       if player.done?
-        # clear cards
-        player.cards.select(&.moved?).each do |card|
-          if card = player.cards.delete(card)
-            @discard_stack.add(card)
-          end
-        end
+        player.clearing_table(@discard_stack, @dealer)
 
-        if player.cards.empty?
+        if player.cleared_table?
+        # if player.cards.empty?
           @done_index += 1
           next_turn
 
@@ -148,9 +144,6 @@ module Cards
         end
       else
         player.done(@dealer)
-        player.cards.each do |card|
-          card.move(@discard_stack.position)
-        end
       end
     end
 

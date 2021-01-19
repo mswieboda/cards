@@ -10,7 +10,8 @@ module Cards
     def initialize
       super
 
-      deck = StandardDeck.new(jokers: false)
+      # deck = StandardDeck.new(jokers: false)
+      deck = TestDeck.new
 
       seats = [] of Seat
       seats << Seat.new(

@@ -1,13 +1,17 @@
 module Cards
-  class StandardDeck < Deck
-    def initialize(@back = CardBacks::Stripes.new, @jokers = false, flipped = true)
+  class TestDeck < Deck
+    def initialize(@back = CardBacks::Stripes.new, @jokers = false, flipped = false)
       cards = [] of Card
 
-      # adds 52 standard cards from diamonds, clubs, hearts, spades
       Suit.values.each do |suit|
         Rank.values.each do |rank|
           next if rank.joker?
-          cards << Card.new(deck: self, rank: rank, suit: suit, flipped: flipped)
+          next if rank.ace? || rank.face?
+
+          # adds each card 5 times, for testing
+          5.times do
+            cards << Card.new(deck: self, rank: rank, suit: suit, flipped: flipped)
+          end
         end
       end
 
@@ -20,7 +24,7 @@ module Cards
       super(
         back: back,
         jokers: @jokers,
-        cards: cards
+        cards: cards.reverse
       )
     end
   end
