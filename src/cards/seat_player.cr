@@ -77,11 +77,13 @@ module Cards
     def draw(screen_x = 0, screen_y = 0)
       super
 
-      @chips.each(&.draw(screen_x, screen_y))
+      @chips.select { |c| c.y <= @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
 
       last_y = draw_chips(screen_x, screen_y)
       last_y = draw_name(screen_x, screen_y, last_y)
       last_y = draw_balance(screen_x, screen_y, last_y)
+
+      @chips.select { |c| c.y > @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
     end
 
     def draw_chips(screen_x = 0, screen_y = 0)

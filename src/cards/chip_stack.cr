@@ -26,6 +26,14 @@ module Cards
       update_chips_position
     end
 
+    def top_y
+      y - height
+    end
+
+    def height
+      @chips.size * Chip.height_depth
+    end
+
     def init_chip_frames
       @chips.each_with_index do |chip, index|
         update_last_chip_frame(chip: chip, last_index: index - 1)
