@@ -9,7 +9,9 @@ module Cards
     @deck_stack : CardStack
     @discard_stack : CardStack
 
-    def initialize(@deck, @seats = [] of Seat, seat_players = [] of SeatPlayer, @dealer = Dealer.new)
+    DEFAULT_NUMBER_OF_DECKS = 6
+
+    def initialize(@deck, decks = DEFAULT_NUMBER_OF_DECKS, @seats = [] of Seat, seat_players = [] of SeatPlayer, @dealer = Dealer.new)
       @players = [] of CardPlayer
       @seat_players = [] of SeatPlayer
 
@@ -36,7 +38,7 @@ module Cards
       @deck_stack = CardStack.new(
         x: Main.screen_width - Card.width - CardSpot.margin,
         y: CardSpot.margin,
-        cards: @deck.cards.dup
+        cards: @deck.cards.dup * decks
       )
       @discard_stack = CardStack.new(
         x: CardSpot.margin,
