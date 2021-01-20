@@ -16,7 +16,7 @@ module Cards
     HEIGHT = 16
     HEIGHT_DEPTH = 3
 
-    MOVEMENT_FRAMES = 15
+    MOVEMENT_FRAMES = 20
 
     enum Amount : UInt8
       One = 1
@@ -74,6 +74,8 @@ module Cards
     end
 
     def self.largest(total : Int32 | Float32) : Chip | Nil
+      return if total <= 0
+
       if amount = Chip::Amount.values.reverse.find { |amount| amount.value <= total }
         amount.to_chip
       end

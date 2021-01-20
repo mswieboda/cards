@@ -12,9 +12,10 @@ module Cards
     getter? clearing_table
 
     @dealing_card : Nil | Card
+    @clearing_card_index : Int32
 
     ACTION_DELAY = 0.33_f32
-    DEAL_DELAY = ACTION_DELAY
+    DEAL_DELAY = 0.13_f32
     DONE_DELAY = 1.69_f32
 
     def initialize(@seat = Seat.new, @cards = [] of Card)
@@ -27,6 +28,7 @@ module Cards
       @elapsed_delay_time = @delay_time = 0_f32
       @message = ""
       @clearing_table = false
+      @clearing_card_index = 0
     end
 
     def update(frame_time)
@@ -230,26 +232,34 @@ module Cards
     def done(_dealer : Dealer)
       log(:done)
       @done = true
+      @clearing_card_index = cards.size - 1
       delay(deal_delay)
     end
 
     def cleared_table?
+      log(:cleared_table?, "cards: #{cards.map(&.short_name)} cci: #{@clearing_card_index}")
       cards.empty?
     end
 
-    def clearing_table(discard_stack : CardStack, _dealer : Dealer)
-      unless clearing_table?
-        # discard all cards at once
-        cards.each do |card|
+    def clear_table(discard_stack : CardStack)
+      unless cards.empty?
+        if @clearing_card_index >= 0
+          card = cards[@clearing_card_index]
           card.move(discard_stack.position)
-        end
 
-        @clearing_table = true
-      else
-        # clear cards
-        cards.select(&.moved?).each do |card|
-          cards.delete(card)
-          discard_stack.add(card)
+          # clear cards
+          cards[@clearing_card_index..-1].select(&.moved?).each_with_index do |card|
+            cards.delete(card)
+            discard_stack.add(card)
+          end
+
+          @clearing_card_index -= 1
+          delay(deal_delay)
+        else
+          cards.select(&.moved?).each_with_index do |card|
+            cards.delete(card)
+            discard_stack.add(card)
+          end
         end
       end
     end
@@ -264,6 +274,7 @@ module Cards
       @bust = false
       @blackjack = false
       @done = false
+      @clearing_table = false
     end
 
     def hand_value(cards = @cards)

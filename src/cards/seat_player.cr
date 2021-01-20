@@ -5,9 +5,11 @@ module Cards
     getter bet : Int32 | Float32
     getter? placing_bet
     getter? confirmed_bet
+    getter? settled_bet
     getter? leave_table
 
     @payout : Int32 | Float32
+    @paid_out : Int32 | Float32
     @chip_stack_bet : ChipStack
     @chip_stack_winnings : ChipStack
     @chips : Array(Chip)
@@ -26,28 +28,34 @@ module Cards
 
       @bet = 0
       @payout = 0
+      @paid_out = 0
       @result = Result::Push
       @placing_bet = false
       @confirmed_bet = false
+      @settled_bet = false
       @leave_table = false
 
-      @chip_stack_bet = ChipStack.new(
-        x: seat.x - Chip.width / 2_f32,
-        y: seat.y + CardSpot.height + CardSpot.margin
-      )
-      @chip_stack_winnings = ChipStack.new(
-        x: seat.x - Chip.width / 2_f32 - CardSpot.margin - Chip.width,
-        y: seat.y + CardSpot.height + CardSpot.margin
-      )
+      @chip_stack_bet = ChipStack.new
+      @chip_stack_winnings = ChipStack.new
 
       @chips = [] of Chip
+
+      update_chip_stack_positions
     end
 
     def seat=(seat : Seat)
       @seat = seat
+
+      update_chip_stack_positions
+
+      @seat
+    end
+
+    def update_chip_stack_positions
       @chip_stack_bet.x = @seat.x - Chip.width / 2_f32
       @chip_stack_bet.y = @seat.y + CardSpot.height + CardSpot.margin
-      @seat
+      @chip_stack_winnings.x = @seat.x - Chip.width / 2_f32 - CardSpot.margin - Chip.width
+      @chip_stack_winnings.y = @seat.y + CardSpot.height + CardSpot.margin
     end
 
     def update(frame_time)
@@ -59,7 +67,7 @@ module Cards
 
       if playing?
         playing_update(frame_time)
-      elsif !confirmed_bet?
+      elsif placing_bet? || !confirmed_bet?
         betting_update(frame_time)
       end
     end
@@ -90,6 +98,7 @@ module Cards
       mid_x = seat.x
 
       @chip_stack_bet.draw(screen_x, screen_y)
+      @chip_stack_winnings.draw(screen_x, screen_y)
 
       y = @chip_stack_bet.y + Chip.height + (CardSpot.margin / 2_f32).to_i
 
@@ -152,10 +161,12 @@ module Cards
     def new_hand
       super
 
-      @confirmed_bet = false
       @placing_bet = false
+      @confirmed_bet = false
+      @settled_bet = false
       @bet = 0
       @payout = 0
+      @paid_out = 0
       @result = Result::Push
     end
 
@@ -270,72 +281,74 @@ module Cards
       @chip_stack_winnings.empty? && @chip_stack_bet.empty? && @chips.empty?
     end
 
-    def paid_out?
-      @chips.none?(&.moving?) && (
-        @chip_stack_winnings.chip_value == @payout ||
+    def paid?
+      @paid_out == @chip_stack_winnings.chip_value && (
+        @paid_out == @payout ||
         # in case payout is greater than the lowest chip amount (Amount::One value of 1)
         # such as winnings = 50, payout = 50.25
-        @chip_stack_winnings.chip_value + Chip::Amount.values.first.value > @payout
+        @paid_out + Chip::Amount.values.first.value > @payout
       )
     end
 
-    def payout_chip(dealer)
-      # create largest chip, move chip to player @chip_stack_winnings
-      if chip = Chip.largest(@payout)
-        @payout -= chip.value
+    def pay_player_chip(dealer)
+      if chip = Chip.largest(@payout - @paid_out)
+        @paid_out += chip.value
 
-        if chip_tray = dealer.chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
-          chip.position = chip_tray.position.copy
-          @chips << chip
-          chip.move(@chip_stack_winnings.add_chip_position)
+        pay_chip(chip: chip, dealer: dealer, from_dealer: true)
+      end
+    end
+
+    def pay_dealer_chip(dealer)
+      chip = @chip_stack_bet.take
+
+      pay_chip(chip: chip, dealer: dealer)
+    end
+
+    def pay_chip(chip : Chip, dealer : Dealer, from_dealer = false)
+      if chip_tray = dealer.chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
+        chip.position = chip_tray.position.copy if from_dealer
+        @chips << chip
+        chip.move(from_dealer ? @chip_stack_winnings.add_chip_position : chip_tray.position)
+        delay(chip_delay)
+      end
+    end
+
+    def settle_bet(dealer : Dealer)
+      log(:settle_bet)
+
+      @chips.select(&.moved?).each do |chip|
+        @chips.delete(chip)
+        @chip_stack_winnings.add(chip) if @result.win? || @result.push?
+      end
+
+      if @result.win? || @result.push?
+        pay_player_chip(dealer) unless paid?
+
+        if paid? && @chips.empty?
+          @settled_bet = true
+          delay(done_delay)
+        end
+      else
+        if @chip_stack_bet.empty?
+          if @chips.empty?
+            @settled_bet = true
+            delay(action_delay)
+          end
+        else
+          pay_dealer_chip(dealer)
         end
       end
     end
 
-    def clearing_table(_discard_stack : CardStack, dealer : Dealer)
-      log(:clearing_table)
+    def clear_table(discard_stack : CardStack)
+      log(:clear_table)
 
       if cleared_chips?
-        super
+        super(discard_stack)
       else
-        if @result.win?
-          @chips.select(&.moved?).each do |chip|
-            @chips.delete(chip)
-            @chip_stack_bet.add(chip)
-          end
-
-          if @chips.none?(&.moving?)
-            if paid_out?
-              # TODO:
-              # TODO:
-              # TODO:
-              # move chip to player, one from winnings, one from bet
-              @chip_stack_bet.chips.clear
-              @chip_stack_winnings.chips.clear
-              # TODO:
-              # TODO:
-              # TODO:
-
-            else
-              payout_chip(dealer)
-            end
-          end
-        else
-          @chips.select(&.moved?).each do |chip|
-            @chips.delete(chip)
-          end
-
-          # move chip to dealer from bet
-          unless @chip_stack_bet.empty?
-            chip = @chip_stack_bet.take
-
-            if chip_tray = dealer.chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
-              @chips << chip
-              chip.move(chip_tray.position)
-              delay(chip_delay)
-            end
-          end
-        end
+        @clearing_table = true
+        @chip_stack_bet.chips.clear
+        @chip_stack_winnings.chips.clear
       end
     end
   end
