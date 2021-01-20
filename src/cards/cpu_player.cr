@@ -5,6 +5,8 @@ module Cards
     MIN_BALANCE = 5
     BET = 5
 
+    DONE_DELAY = 0.69_f32
+
     def playing_update(_frame_time)
       # TODO: impl strategy, copy dealer's logic for now
       if hand_value >= 17 && !soft_17?
@@ -47,6 +49,10 @@ module Cards
       end
 
       delay(action_delay)
+    end
+
+    def done_delay
+      DONE_DELAY
     end
   end
 end

@@ -105,7 +105,7 @@ module Cards
     end
 
     def play(player : CardPlayer)
-      if !player.playing?
+      unless player.played? || player.playing?
         if player == @dealer
           all_busted_or_blackjack = seat_players.all? { |p| p.bust? || p.blackjack? }
           @dealer.play(all_busted_or_blackjack)
