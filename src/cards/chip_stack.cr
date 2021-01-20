@@ -28,32 +28,25 @@ module Cards
 
     def init_chip_frames
       @chips.each_with_index do |chip, index|
-        if @chips.size > 1
-          # ensure chip frame isn't same as last
-          if last = @chips[index - 1]
-            while chip.frame == last.frame
-              chip.frame = rand(chip.frames)
-            end
-          end
-        end
+        update_last_chip_frame(chip: chip, last_index: index - 1)
+      end
+    end
+
+    def update_last_chip_frame(chip = @chips[-1], last_index = -2)
+      return if @chips.size < 2 || last_index == 0 || last_index + @chips.size == 0
+
+      while chip.frame == @chips[last_index].frame
+        chip.frame = rand(chip.frames)
       end
     end
 
     def add(chip : Chip)
-      last = @chips[-1] unless @chips.empty?
-
       @chips << chip
-
-      if last
-        while chip.frame == last.frame
-          chip.frame = rand(chip.frames)
-        end
-      end
-
+      update_last_chip_frame
       update_chips_position
     end
 
-    def take : Chip | Nil
+    def take : Chip
       @chips.pop
     end
 

@@ -1,6 +1,6 @@
 module Cards
   class Main < Game::Game
-    DEBUG = true
+    DEBUG = false
     TARGET_FPS = 60
 
     @game : GameMode

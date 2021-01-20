@@ -13,6 +13,8 @@ module Cards
     @chips : Array(Chip)
     @result : Result
 
+    CHIP_DELAY = 0.13_f32
+
     enum Result
       Lose
       Win
@@ -254,12 +256,16 @@ module Cards
       @leave_table = true
     end
 
+    def chip_delay
+      CHIP_DELAY
+    end
+
     def cleared_table?
       super && cleared_chips?
     end
 
     def cleared_chips?
-      @chip_stack_winnings.empty? && @chip_stack_bet.empty?
+      @chip_stack_winnings.empty? && @chip_stack_bet.empty? && @chips.empty?
     end
 
     def paid_out?
@@ -318,11 +324,14 @@ module Cards
           end
 
           # move chip to dealer from bet
-          chip = @chip_stack_bet.take
+          unless @chip_stack_bet.empty?
+            chip = @chip_stack_bet.take
 
-          if chip_tray = dealer.chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
-            @chips << chip
-            chip.move(chip_tray.position)
+            if chip_tray = dealer.chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
+              @chips << chip
+              chip.move(chip_tray.position)
+              delay(chip_delay)
+            end
           end
         end
       end

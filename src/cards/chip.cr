@@ -16,8 +16,7 @@ module Cards
     HEIGHT = 16
     HEIGHT_DEPTH = 3
 
-    # MOVEMENT_FRAMES = 15
-    MOVEMENT_FRAMES = 30
+    MOVEMENT_FRAMES = 15
 
     enum Amount : UInt8
       One = 1
