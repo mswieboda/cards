@@ -3,16 +3,16 @@ module Cards
     property position : Game::Vector
     property cards : Array(Card)
 
+    delegate :x, :y, to: position
+    delegate :size, :empty?, to: cards
+
     def initialize(x = 0, y = 0, @cards = [] of Card)
       @position = Game::Vector.new(
         x: x,
         y: y
       )
 
-      @cards.each do |card|
-        card.position.x = x
-        card.position.y = y
-      end
+      update_cards_position
     end
 
     def update(frame_time)
@@ -20,19 +20,25 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      return if cards.empty?
-      # draw top card
-      # TODO: draw shadow bottom/right to show depth if more than 1 card?
-      cards[-1].draw(screen_x, screen_y)
+      @cards.each(&.draw(screen_x, screen_y))
     end
 
     def add(card : Card)
-      card.position.x = position.x
-      card.position.y = position.y
+      card.position.x = x
+      card.position.y = y
 
       card.flip unless card.flipped?
 
       @cards << card
+
+      update_cards_position
+    end
+
+    def update_cards_position
+      @cards.each_with_index do |card, index|
+        card.position.x = x
+        card.position.y = y - index * Card.height_depth
+      end
     end
 
     def take : Card
@@ -41,6 +47,7 @@ module Cards
 
     def shuffle!
       @cards.shuffle!
+      update_cards_position
     end
   end
 end

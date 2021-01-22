@@ -14,6 +14,9 @@ module Cards
     # bicycle card size in mm from https://en.wikipedia.org/wiki/Standard_52-card_deck#Size_of_the_cards
     WIDTH = 64
     HEIGHT = 88
+    HEIGHT_DEPTH = 0.666_f32
+
+    DROP_SHADOW = 1
 
     MOVEMENT_FRAMES = 15
 
@@ -28,6 +31,10 @@ module Cards
 
     def self.height
       HEIGHT
+    end
+
+    def self.height_depth
+      HEIGHT_DEPTH
     end
 
     def clone : Card
@@ -47,6 +54,10 @@ module Cards
 
     def height
       self.class.height
+    end
+
+    def height_depth
+      self.class.height_depth
     end
 
     def flip
@@ -98,6 +109,8 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
+      draw_shadow(screen_x, screen_y)
+
       if flipped?
         @deck.back.draw(
           screen_x: screen_x + x,
@@ -112,6 +125,17 @@ module Cards
           screen_y: screen_y + y
         )
       end
+    end
+
+    def draw_shadow(screen_x, screen_y)
+      Game::RoundedRectangle.new(
+        x: screen_x + x + DROP_SHADOW,
+        y: screen_y + y + DROP_SHADOW,
+        width: width,
+        height: height,
+        roundness: 0.15_f32,
+        color: Game::Color::Black.alpha(33_u8),
+      ).draw
     end
 
     def to_s(io : IO)
