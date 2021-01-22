@@ -158,7 +158,7 @@ module Cards
 
       card.flip if card.flipped?
 
-      position = card_spots[[cards.size, card_spots.size - 1].min].position.copy
+      position = card_spots[[cards.size, card_spots.size - 1].min].position.clone
 
       # move over if we've already used all the spots
       position.x += CardSpot.margin * (2 * cards.size - card_spots.size) if cards.size >= card_spots.size

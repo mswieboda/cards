@@ -115,7 +115,7 @@ module Cards
     end
 
     def move(move_to : Game::Vector)
-      @move_to = move_to.copy
+      @move_to = move_to.clone
       @move_delta = move_to.subtract(position) / MOVEMENT_FRAMES
     end
 

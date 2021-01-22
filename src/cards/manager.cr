@@ -38,7 +38,7 @@ module Cards
       @deck_stack = CardStack.new(
         x: Main.screen_width - Card.width - CardSpot.margin,
         y: CardSpot.margin,
-        cards: @deck.cards.dup * decks
+        cards: @deck.cards.clone * decks
       )
       @discard_stack = CardStack.new(
         x: CardSpot.margin,

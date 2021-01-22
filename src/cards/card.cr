@@ -17,8 +17,7 @@ module Cards
 
     MOVEMENT_FRAMES = 15
 
-    def initialize(@deck, @rank, @suit, @flipped = true)
-      @position = Game::Vector.new
+    def initialize(@deck, @rank, @suit, @flipped = true, @position = Game::Vector.new)
       @move_to = nil
       @move_delta = Game::Vector.new
     end
@@ -29,6 +28,16 @@ module Cards
 
     def self.height
       HEIGHT
+    end
+
+    def clone : Card
+      Card.new(
+        deck: deck,
+        rank: rank,
+        suit: suit,
+        flipped: flipped?,
+        position: position.clone
+      )
     end
 
     # methods for width/height in case of changing to instance vars later
@@ -61,7 +70,7 @@ module Cards
     end
 
     def move(move_to : Game::Vector)
-      @move_to = move_to.copy
+      @move_to = move_to.clone
       @move_delta = move_to.subtract(position) / MOVEMENT_FRAMES
     end
 

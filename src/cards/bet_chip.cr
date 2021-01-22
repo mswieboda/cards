@@ -21,7 +21,7 @@ module Cards
 
     def to_chip : Chip
       chip = Chip.new(amount: @amount)
-      chip.position = position.copy
+      chip.position = position.clone
       chip
     end
 

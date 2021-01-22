@@ -306,7 +306,7 @@ module Cards
 
     def pay_chip(chip : Chip, dealer : Dealer, from_dealer = false)
       if chip_tray = dealer.chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
-        chip.position = chip_tray.position.copy if from_dealer
+        chip.position = chip_tray.position.clone if from_dealer
         @chips << chip
         chip.move(from_dealer ? @chip_stack_winnings.add_chip_position : chip_tray.position)
         delay(chip_delay)
