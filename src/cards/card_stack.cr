@@ -23,11 +23,15 @@ module Cards
       @cards.each(&.draw(screen_x, screen_y))
     end
 
-    def add(card : Card)
-      card.position.x = x
-      card.position.y = y
+    def add_card_position
+      Game::Vector.new(
+        x: x,
+        y: y - @cards.size * Card.height_depth
+      )
+    end
 
-      card.flip unless card.flipped?
+    def add(card : Card, flipped = true)
+      card.flip if flipped && !card.flipped?
 
       @cards << card
 

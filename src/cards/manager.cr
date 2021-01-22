@@ -56,10 +56,10 @@ module Cards
 
     def draw(screen_x = 0, screen_y = 0)
       @seats.each(&.draw(screen_x, screen_y))
-      seat_players.each(&.draw(screen_x, screen_y))
-      dealer.draw(screen_x, screen_y)
       @deck_stack.draw(screen_x, screen_y)
       @discard_stack.draw(screen_x, screen_y)
+      seat_players.each(&.draw(screen_x, screen_y))
+      dealer.draw(screen_x, screen_y)
     end
 
     def turn_player

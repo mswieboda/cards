@@ -245,7 +245,7 @@ module Cards
       unless cards.empty?
         if @clearing_card_index >= 0
           card = cards[@clearing_card_index]
-          card.move(discard_stack.position)
+          card.move(discard_stack.add_card_position)
 
           # clear cards
           cards[@clearing_card_index..-1].select(&.moved?).each_with_index do |card|
