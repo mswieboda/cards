@@ -62,7 +62,7 @@ module Cards
     end
 
     def update_last_chip_frame(chip = @chips[-1], last_index = -2)
-      return if @chips.size < 2 || last_index == 0 || last_index + @chips.size == 0
+      return if @chips.size < 2 || last_index == 0 || last_index + @chips.size + 1 == 0
 
       while chip.frame == @chips[last_index].frame
         chip.frame = rand(chip.frames)
@@ -98,13 +98,7 @@ module Cards
     end
 
     def selected_chip
-      if selected?
-        if chips.any?
-          if chip = chips[-1]
-            chip.copy
-          end
-        end
-      end
+      take if selected? && chips.any?
     end
 
     def update(frame_time)

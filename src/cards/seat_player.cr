@@ -313,7 +313,12 @@ module Cards
 
       @chips.select(&.moved?).each do |chip|
         @chips.delete(chip)
-        @chip_stack_winnings.add(chip) if @result.win? || @result.push?
+
+        if @result.win? || @result.push?
+          @chip_stack_winnings.add(chip)
+        else
+          dealer.chip_tray.add(chip)
+        end
       end
 
       if @result.win? || @result.push?

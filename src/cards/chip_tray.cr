@@ -11,7 +11,10 @@ module Cards
       @chip_amounts = Hash(Chip::Amount, Chip).new
 
       Chip::Amount.values.each do |amount|
-        chip_stacks[amount] = ChipStack.new(selectable: true)
+        chip_stack = ChipStack.new(selectable: true)
+        # TODO: fix the initial chips so it matches the player's balance
+        3.times { chip_stack.add(Chip.new(amount: amount)) }
+        chip_stacks[amount] = chip_stack
         @chip_amounts[amount] = Chip.new(amount: amount)
       end
     end
@@ -59,17 +62,8 @@ module Cards
     def selected_chip
       @chip_stacks.each do |(amount, chip_stack)|
         if chip_stack.selected?
-          if chip_stack.empty?
-            if chip_template = @chip_amounts[amount]
-              chip = chip_template.copy
-              chip.x = chip_stack.x
-              chip.y = chip_stack.y
-              return chip
-            end
-          else
-            if chip = chip_stack.selected_chip
-              return chip
-            end
+          if chip = chip_stack.selected_chip
+            return chip
           end
         end
       end
