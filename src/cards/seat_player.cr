@@ -7,6 +7,7 @@ module Cards
     getter? confirmed_bet
     getter? settled_bet
     getter? leave_table
+    getter chip_trays : Array(ChipTray)
 
     @payout : Int32 | Float32
     @paid_out : Int32 | Float32
@@ -23,7 +24,7 @@ module Cards
       Push
     end
 
-    def initialize(@name = "", seat = Seat.new, @balance = 0)
+    def initialize(@name = "", seat = Seat.new, @balance = 0, @chip_trays = ChipTray.amounts)
       super(seat: seat)
 
       @bet = 0
@@ -40,22 +41,28 @@ module Cards
 
       @chips = [] of Chip
 
-      update_chip_stack_positions
+      update_positions_based_on_seat
     end
 
     def seat=(seat : Seat)
       @seat = seat
 
-      update_chip_stack_positions
+      update_positions_based_on_seat
 
       @seat
     end
 
-    def update_chip_stack_positions
+    def update_positions_based_on_seat
       @chip_stack_bet.x = @seat.x - Chip.width / 2_f32
       @chip_stack_bet.y = @seat.y + CardSpot.height + CardSpot.margin
       @chip_stack_winnings.x = @seat.x - Chip.width / 2_f32 - CardSpot.margin - Chip.width
       @chip_stack_winnings.y = @seat.y + CardSpot.height + CardSpot.margin
+
+      @chip_trays.each_with_index do |chip_tray, index|
+        start_x = @seat.x - Chip::Amount.values.size / 2_f32 * (ChipTray.width + CardSpot.margin) + CardSpot.margin / 2_f32
+        chip_tray.x = start_x + index * (ChipTray.width + CardSpot.margin)
+        chip_tray.y = Main.screen_height - CardSpot.margin - ChipTray.height
+      end
     end
 
     def update(frame_time)
@@ -83,6 +90,8 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
+      @chip_trays.each(&.draw(screen_x, screen_y))
+
       super
 
       @chips.select { |c| c.y <= @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
@@ -340,15 +349,35 @@ module Cards
       end
     end
 
+    def clear_chip(chip_stack : ChipStack)
+      return if chip_stack.empty?
+
+      chip = chip_stack.take
+
+      if chip_tray = chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
+        chip.move(chip_tray.position)
+        @chips << chip
+        delay(deal_delay)
+      end
+    end
+
     def clear_table(discard_stack : CardStack)
       log(:clear_table)
 
       if cleared_chips?
-        super(discard_stack)
+        super
       else
-        @clearing_table = true
-        @chip_stack_bet.chips.clear
-        @chip_stack_winnings.chips.clear
+        clear_chip(@chip_stack_winnings)
+        clear_chip(@chip_stack_bet)
+
+        @chips.select(&.moved?).each do |chip|
+          @chips.delete(chip)
+
+          # TODO: add to specific chip tray
+          # if chip_tray = chip_trays.find { |chip_tray| chip_tray.amount == chip.amount }
+          #   chip_tray.add(chip)
+          # end
+        end
       end
     end
   end

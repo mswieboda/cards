@@ -17,9 +17,32 @@ module Cards
       @sprite_accent = Game::Sprite.get(:chip_accent)
     end
 
+    def update(_frame_time)
+    end
+
     def draw(screen_x = 0, screen_y = 0)
       @sprite.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color)
       @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color_accent)
+    end
+
+    def self.amounts : Array(ChipTray)
+      Chip::Amount.values.map { |amount| ChipTray.new(amount: amount) }
+    end
+
+    def self.width
+      Chip.width
+    end
+
+    def self.height
+      Chip.height
+    end
+
+    def width
+      self.class.width
+    end
+
+    def height
+      self.class.height
     end
   end
 end

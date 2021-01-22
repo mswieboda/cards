@@ -1,13 +1,13 @@
-require "./chip"
+require "./chip_tray"
 
 module Cards
-  class BetChip < Chip
+  class BetTray < ChipTray
     getter? hovered
     getter? selected
 
     @sprite_highlight : Game::Sprite
 
-    def initialize(amount = Amount::Five)
+    def initialize(x = 0, y = 0, amount = Amount::Five)
       super
 
       @hovered = false
@@ -15,8 +15,8 @@ module Cards
       @sprite_highlight = Game::Sprite.get(:chip_highlight)
     end
 
-    def self.amounts : Array(BetChip)
-      Chip::Amount.values.map { |amount| BetChip.new(amount: amount) }
+    def self.amounts : Array(BetTray)
+      Chip::Amount.values.map { |amount| BetTray.new(amount: amount) }
     end
 
     def to_chip : Chip
@@ -35,8 +35,8 @@ module Cards
 
       if hovered?
         @sprite_highlight.draw(
-          x: screen_x + x - (@sprite_highlight.width - @sprite.width) / 2_f32,
-          y: screen_y + y - (@sprite_highlight.height - @sprite.height) / 2_f32,
+          x: screen_x + x - (@sprite_highlight.width - width) / 2_f32,
+          y: screen_y + y - (@sprite_highlight.height - height) / 2_f32,
           tint: Game::Color::Yellow
         )
       end

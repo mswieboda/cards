@@ -248,7 +248,7 @@ module Cards
           card.move(discard_stack.add_card_position)
 
           # clear cards
-          cards[@clearing_card_index..-1].select(&.moved?).each_with_index do |card|
+          cards[@clearing_card_index..-1].select(&.moved?).each do |card|
             cards.delete(card)
             discard_stack.add(card)
           end

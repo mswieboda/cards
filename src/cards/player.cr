@@ -2,12 +2,24 @@ require "./seat_player"
 
 module Cards
   class Player < SeatPlayer
-    @bet_ui : BetUI
+    @bet_trays : Array(BetTray)
 
     def initialize(name = "", seat = Seat.new, balance = 0)
-      super
+      @bet_trays = [] of BetTray
+      chip_trays = [] of ChipTray
 
-      @bet_ui = BetUI.new
+      Chip::Amount.values.each do |amount|
+        bet_tray = BetTray.new(amount: amount)
+        chip_trays << bet_tray
+        @bet_trays << bet_tray
+      end
+
+      super(
+        name: name,
+        seat: seat,
+        balance: balance,
+        chip_trays: chip_trays
+      )
     end
 
     def playing_update(_frame_time)
@@ -21,9 +33,11 @@ module Cards
     def betting_update(frame_time)
       super
 
-      @bet_ui.update(frame_time)
+      @chip_trays.each(&.update(frame_time))
 
-      if chip = @bet_ui.chip
+      if bet_tray = @bet_trays.find(&.selected?)
+        chip = bet_tray.to_chip
+
         if place_bet(chip.value)
           @placing_bet = true
           chip.move(@chip_stack_bet.add_chip_position)
@@ -34,12 +48,6 @@ module Cards
       @placing_bet = false if @chips.empty?
 
       confirm_bet if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
-    end
-
-    def draw(screen_x = 0, screen_y = 0)
-      super
-
-      @bet_ui.draw(screen_x, screen_y)
     end
   end
 end
