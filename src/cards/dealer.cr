@@ -1,7 +1,5 @@
 module Cards
   class Dealer < CardPlayer
-    getter chip_trays : Array(ChipTray)
-
     CARD_SPOT_Y_RATIO = 6_f32
 
     ACTION_DELAY = 0.69_f32
@@ -13,20 +11,13 @@ module Cards
         y: Main.screen_height / CARD_SPOT_Y_RATIO
       )
 
-      super(seat: seat)
-
-      @chip_trays = Chip::Amount.values.map_with_index do |amount, index|
-        start_x = seat.x - Chip::Amount.values.size / 2_f32 * (Chip.width + CardSpot.margin) + CardSpot.margin / 2_f32
-        ChipTray.new(
-          x: start_x + index * (Chip.width + CardSpot.margin),
-          y: CardSpot.margin,
-          amount: amount
-        )
-      end
+      super(
+        seat: seat,
+        chip_tray: ChipTray.new(y: CardSpot.margin)
+      )
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      @chip_trays.each(&.draw(screen_x, screen_y))
       seat.draw(screen_x, screen_y)
 
       super

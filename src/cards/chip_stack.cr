@@ -2,15 +2,24 @@ module Cards
   class ChipStack
     getter chips : Array(Chip)
     getter position : Game::Vector
+    getter? selectable
+    getter? hovered
+    getter? selected
 
     delegate :x, :y, to: position
     delegate :size, :empty?, to: chips
 
-    def initialize(x = 0, y = 0, @chips = [] of Chip)
+    @sprite_highlight : Game::Sprite
+
+    def initialize(x = 0, y = 0, @chips = [] of Chip, @selectable = false)
       @position = Game::Vector.new(
         x: x,
         y: y
       )
+
+      @hovered = false
+      @selected = false
+      @sprite_highlight = Game::Sprite.get(:chip_highlight)
 
       init_chip_frames
       update_chips_position
@@ -24,6 +33,18 @@ module Cards
     def y=(value : Int32 | Float32)
       @position.y = value
       update_chips_position
+    end
+
+    def self.amounts : Array(ChipStack)
+      Chip::Amount.values.map { |amount| ChipStack.new }
+    end
+
+    def self.width
+      Chip.width
+    end
+
+    def width
+      self.class.width
     end
 
     def top_y
@@ -76,8 +97,64 @@ module Cards
       @chips.map(&.value).sum
     end
 
+    def selected_chip
+      if selected?
+        if chips.any?
+          if chip = chips[-1]
+            chip.copy
+          end
+        end
+      end
+    end
+
+    def update(frame_time)
+      if selectable?
+        if @chips.any?
+          @hovered = Game::Mouse.in?(
+            x: x,
+            y: y - height,
+            width: width,
+            height: height + Chip.height
+          )
+        else
+          @hovered = Game::Mouse.in?(
+            x: x,
+            y: y - Chip.height_depth,
+            width: width,
+            height: Chip.height_depth + Chip.height
+          )
+        end
+
+        @selected = hovered? && Game::Mouse::Left.pressed?
+      end
+    end
+
     def draw(screen_x = 0, screen_y = 0)
       @chips.each(&.draw(screen_x, screen_y))
+
+      draw_x = screen_x - (@sprite_highlight.width - width) / 2_f32
+      draw_y = screen_y - (@sprite_highlight.height - Chip.height) / 2_f32
+
+      if hovered?
+        if @chips.any?
+          if chip = chips[-1]
+            draw_x += chip.x
+            draw_y += chip.y
+          else
+            draw_x += x
+            draw_y += y
+          end
+        else
+          draw_x += x
+          draw_y += y
+        end
+
+        @sprite_highlight.draw(
+          x: draw_x,
+          y: draw_y,
+          tint: Game::Color::Yellow
+        )
+      end
     end
   end
 end

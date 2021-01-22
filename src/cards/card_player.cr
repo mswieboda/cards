@@ -7,9 +7,10 @@ module Cards
     property? hitting
     getter? bust
     getter? blackjack
-    property seat : Seat
+    getter seat : Seat
     getter message : String
     getter? clearing_table
+    getter chip_tray : ChipTray
 
     @dealing_card : Nil | Card
     @clearing_card_index : Int32
@@ -18,7 +19,7 @@ module Cards
     DEAL_DELAY = 0.13_f32
     DONE_DELAY = 1.69_f32
 
-    def initialize(@seat = Seat.new, @cards = [] of Card)
+    def initialize(@seat = Seat.new, @cards = [] of Card, @chip_tray = ChipTray.new)
       @playing = false
       @played = false
       @done = false
@@ -29,6 +30,18 @@ module Cards
       @message = ""
       @clearing_table = false
       @clearing_card_index = 0
+
+      update_positions
+    end
+
+    def seat=(seat : Seat)
+      @seat = seat
+      update_positions
+      @seat
+    end
+
+    def update_positions
+      chip_tray.update_positions(@seat)
     end
 
     def update(frame_time)
@@ -53,6 +66,8 @@ module Cards
     end
 
     def draw(screen_x = 0, screen_y = 0)
+      chip_tray.draw(screen_x, screen_y)
+
       cards.each(&.draw(screen_x, screen_y))
 
       last_y = draw_hand_display(screen_x, screen_y)

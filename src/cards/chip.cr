@@ -3,7 +3,7 @@ module Cards
     property position : Game::Vector
     getter amount : Amount
 
-    delegate :x, :y, to: position
+    delegate :x, :x=, :y, :y=, to: position
     delegate :frame, :frames, to: @sprite
     delegate :value, to: @amount
 
@@ -56,7 +56,7 @@ module Cards
       end
     end
 
-    def initialize(@amount = Amount::Five)
+    def initialize(x = 0, y = 0, @amount = Amount::Five)
       @sprite = Game::Sprite.get(:chip_color)
       @sprite_accent = Game::Sprite.get(:chip_accent)
 
@@ -64,7 +64,7 @@ module Cards
       @sprite.frame = frame
       @sprite_accent.frame = frame
 
-      @position = Game::Vector.new
+      @position = Game::Vector.new(x: x, y: y)
       @move_to = nil
       @move_delta = Game::Vector.new
     end
@@ -147,9 +147,17 @@ module Cards
       end
     end
 
-    def draw(screen_x = 0, screen_y = 0)
-      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color)
-      @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color_accent)
+    def draw(screen_x = 0, screen_y = 0, alpha = 255_u8)
+      @sprite.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color.alpha(alpha))
+      @sprite_accent.draw(x: screen_x + x, y: screen_y + y, tint: @amount.color_accent.alpha(alpha))
+    end
+
+    def copy
+      Chip.new(
+        x: x,
+        y: y,
+        amount: amount
+      )
     end
   end
 end
