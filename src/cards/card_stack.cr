@@ -4,7 +4,7 @@ module Cards
     property cards : Array(Card)
 
     delegate :x, :y, to: position
-    delegate :size, :empty?, to: cards
+    delegate :size, :empty?, :any?, to: cards
 
     def initialize(x = 0, y = 0, @cards = [] of Card)
       @position = Game::Vector.new(
@@ -47,6 +47,12 @@ module Cards
 
     def take : Card
       @cards.pop
+    end
+
+    def take_sample : Card | Nil
+      card = @cards.delete(@cards.sample)
+      update_cards_position
+      card
     end
 
     def shuffle!

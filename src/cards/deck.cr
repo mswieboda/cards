@@ -5,6 +5,8 @@ module Cards
     property cards : Array(Card)
     getter? jokers
 
+    delegate :size, :empty?, :any?, to: cards
+
     def initialize(@back = CardBacks::Bordered.new, @front = CardFronts::Standard.new, @jokers = true, @cards = [] of Card)
     end
 

@@ -5,13 +5,17 @@ module Cards
     getter seat_players : Array(SeatPlayer)
     getter players : Array(CardPlayer)
     getter dealer : Dealer
+    getter decks
+    getter? shuffling
 
     @deck_stack : CardStack
     @discard_stack : CardStack
+    @cards : Array(Card)
 
     DEFAULT_NUMBER_OF_DECKS = 6
+    SHUFFLE_LIMIT_PERCENT = 0.3_f32
 
-    def initialize(@deck, decks = DEFAULT_NUMBER_OF_DECKS, @seats = [] of Seat, seat_players = [] of SeatPlayer, @dealer = Dealer.new)
+    def initialize(@deck, @decks = DEFAULT_NUMBER_OF_DECKS, @seats = [] of Seat, seat_players = [] of SeatPlayer, @dealer = Dealer.new)
       @players = [] of CardPlayer
       @seat_players = [] of SeatPlayer
 
@@ -40,10 +44,17 @@ module Cards
         y: CardSpot.margin,
         cards: decks.times.flat_map { @deck.cards.clone }.to_a
       )
+      @shuffle_stack = CardStack.new(
+        x: Main.screen_width - Card.width * 2 - CardSpot.margin * 2,
+        y: CardSpot.margin
+      )
       @discard_stack = CardStack.new(
         x: CardSpot.margin,
         y: CardSpot.margin
       )
+
+      @cards = [] of Card
+      @shuffling = false
 
       @deck_stack.shuffle!
     end
@@ -51,13 +62,25 @@ module Cards
     def update(frame_time)
       players.each(&.update(frame_time))
 
+      # for shuffling
+      @cards.each(&.update(frame_time))
+
       manage_turn
     end
 
     def draw(screen_x = 0, screen_y = 0)
+      # seat player seats
       @seats.each(&.draw(screen_x, screen_y))
+
+      # for shuffling
+      @cards.each(&.draw(screen_x, screen_y))
+
+      # card stacks
       @deck_stack.draw(screen_x, screen_y)
       @discard_stack.draw(screen_x, screen_y)
+      @shuffle_stack.draw(screen_x, screen_y)
+
+      # players
       dealer.draw(screen_x, screen_y)
       seat_players.each(&.draw(screen_x, screen_y))
     end
@@ -138,7 +161,7 @@ module Cards
         if player.is_a?(SeatPlayer)
           if seat_player = player.as(SeatPlayer)
             if seat_player.settled_bet?
-              seat_player.clear_table(@discard_stack)
+              seat_player.clear_table(@discard_stack) unless seat_player.cleared_table?
             else
               seat_player.settle_bet(@dealer)
             end
@@ -149,6 +172,15 @@ module Cards
 
         if player.cleared_table?
           if players.all? { |p| p.done? && p.cleared_table? }
+            # check for shuffling
+            if shuffling?
+              shuffle
+              return
+            elsif shuffle?
+              shuffle_setup
+              return
+            end
+
             new_hand
           else
             @done_index += 1
@@ -158,6 +190,48 @@ module Cards
       else
         player.done(@dealer)
       end
+    end
+
+    def take_sample(from : CardStack, to : CardStack, frames = 16)
+      return if from.empty?
+
+      if card = from.take_sample
+        card.move(to.add_card_position, frames)
+        @cards << card
+      end
+    end
+
+    def shuffle?
+      !shuffling? && @deck_stack.size / (decks * @deck.size) <= SHUFFLE_LIMIT_PERCENT
+    end
+
+    def shuffle_setup
+      @cards.select(&.moved?).each do |card|
+        @cards.delete(card)
+        @shuffle_stack.add(card)
+      end
+
+      if @deck_stack.empty? && @discard_stack.empty? && @cards.empty? && @shuffle_stack.any?
+        @shuffling = true
+        return
+      end
+
+      take_sample(from: @deck_stack, to: @shuffle_stack)
+      take_sample(from: @discard_stack, to: @shuffle_stack)
+    end
+
+    def shuffle
+      @cards.select(&.moved?).each do |card|
+        @cards.delete(card)
+        @deck_stack.add(card)
+      end
+
+      if @shuffle_stack.empty? && @cards.empty? && @deck_stack.any?
+        @shuffling = false
+        return
+      end
+
+      take_sample(from: @shuffle_stack, to: @deck_stack, frames: 2)
     end
 
     def new_hand

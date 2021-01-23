@@ -18,7 +18,7 @@ module Cards
 
     DROP_SHADOW = 1
 
-    MOVEMENT_FRAMES = 15
+    MOVEMENT_FRAMES = 16
 
     def initialize(@deck, @rank, @suit, @flipped = true, @position = Game::Vector.new)
       @move_to = nil
@@ -80,9 +80,9 @@ module Cards
       !moving?
     end
 
-    def move(move_to : Game::Vector)
+    def move(move_to : Game::Vector, frames = MOVEMENT_FRAMES)
       @move_to = move_to.clone
-      @move_delta = move_to.subtract(position) / MOVEMENT_FRAMES
+      @move_delta = move_to.subtract(position) / frames
     end
 
     def update(frame_time)
