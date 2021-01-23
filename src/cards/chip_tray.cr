@@ -3,17 +3,32 @@ module Cards
     getter chip_stacks : Hash(Chip::Amount, ChipStack)
 
     @chip_amounts : Hash(Chip::Amount, Chip)
-
     @y : Int32 | Float32
 
-    def initialize(@y = 0)
+    MAX_CHIPS = 10
+
+    def initialize(@y = 0, balance = 0)
       @chip_stacks = Hash(Chip::Amount, ChipStack).new
       @chip_amounts = Hash(Chip::Amount, Chip).new
 
-      Chip::Amount.values.each do |amount|
+      leftover_balance = balance
+
+      Chip::Amount.values.each_with_index do |amount, index|
         chip_stack = ChipStack.new(selectable: true)
-        # TODO: fix the initial chips so it matches the player's balance
-        3.times { chip_stack.add(Chip.new(amount: amount)) }
+
+        # add chips to chip stack
+        [(leftover_balance / amount.value).to_i, amount.default_chip_stack].min.times do
+          leftover_balance -= amount.value
+          chip_stack.add(Chip.new(amount: amount))
+        end
+
+        if next_amount = Chip::Amount.values[index + 1]?
+          ((leftover_balance % next_amount.value) / amount.value).to_i.times do
+            leftover_balance -= amount.value
+            chip_stack.add(Chip.new(amount: amount))
+          end
+        end
+
         chip_stacks[amount] = chip_stack
         @chip_amounts[amount] = Chip.new(amount: amount)
       end

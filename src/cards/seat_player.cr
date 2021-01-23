@@ -40,7 +40,10 @@ module Cards
 
       super(
         seat: seat,
-        chip_tray: ChipTray.new(y: Main.screen_height - CardSpot.margin - Chip.height)
+        chip_tray: ChipTray.new(
+          y: Main.screen_height - CardSpot.margin - Chip.height,
+          balance: @balance
+        )
       )
     end
 

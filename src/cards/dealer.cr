@@ -13,7 +13,10 @@ module Cards
 
       super(
         seat: seat,
-        chip_tray: ChipTray.new(y: CardSpot.margin)
+        chip_tray: ChipTray.new(
+          y: CardSpot.margin,
+          balance: 3000,
+        )
       )
     end
 

@@ -51,6 +51,19 @@ module Cards
         end
       end
 
+      def default_chip_stack
+        case self
+        when One, Five
+          10
+        when Twenty
+          5
+        when Fifty, Hundred
+          4
+        else
+          raise "Chip::Amount#default_chip_stack error amount not found: #{self}"
+        end
+      end
+
       def to_chip
         Chip.new(amount: self)
       end
