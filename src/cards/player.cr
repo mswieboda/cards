@@ -3,9 +3,9 @@ require "./seat_player"
 module Cards
   class Player < SeatPlayer
     def playing_update(_frame_time)
-      if Game::Key::Space.pressed?
+      if Key.stand.pressed?
         stand
-      elsif Game::Key::Enter.pressed?
+      elsif Key.hit.pressed?
         hit
       end
     end
@@ -25,7 +25,7 @@ module Cards
 
       @placing_bet = false if @chips.empty?
 
-      confirm_bet if Game::Keys.pressed?([Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter])
+      confirm_bet if Game::Keys.pressed?(Key.confirm_bet_keys)
     end
   end
 end

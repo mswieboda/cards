@@ -39,13 +39,13 @@ module Cards
     def update(frame_time)
       return unless shown?
 
-      if Game::Keys.pressed?([Game::Key::Down, Game::Key::S])
+      if Game::Keys.pressed?(Key.down_keys)
         focus_next
-      elsif Game::Keys.pressed?([Game::Key::Up, Game::Key::W])
+      elsif Game::Keys.pressed?(Key.up_keys)
         focus_last
-      elsif Game::Keys.pressed?([Game::Key::Enter, Game::Key::Space, Game::Key::LShift, Game::Key::RShift])
+      elsif Game::Keys.pressed?(Key.select_keys)
         select_item
-      elsif Game::Keys.pressed?([Game::Key::Escape, Game::Key::Backspace])
+      elsif Game::Keys.pressed?(Key.cancel_keys)
         back
       end
     end
