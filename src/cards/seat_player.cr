@@ -206,8 +206,13 @@ module Cards
         log(:done, "player bust: lose")
         lose(dealer)
       elsif dealer.bust?
-        log(:done, "dealer bust: win")
-        win(dealer)
+        if blackjack?
+          log(:done, "dealer bust, player blackjack: win")
+          win(dealer, Blackjack.blackjack_payout_ratio)
+        else
+          log(:done, "dealer bust: win")
+          win(dealer)
+        end
       else
         if blackjack?
           if dealer.blackjack?
