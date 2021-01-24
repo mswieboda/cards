@@ -105,7 +105,7 @@ module Cards
 
         if play_hand?
           play(player)
-        elsif done?
+        elsif played?
           next_turn if first_turn_and_dealer?(player)
           done(player)
         else
@@ -148,7 +148,7 @@ module Cards
       next_turn if player.played?
     end
 
-    def done?
+    def played?
       players.all?(&.played?)
     end
 

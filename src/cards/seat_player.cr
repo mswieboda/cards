@@ -6,13 +6,15 @@ module Cards
     getter? leave_table
     getter? placing_bet
     getter? clearing_bet
+    getter? doubling_bet
 
-    @payout : Int32 | Float32
-    @paid_out : Int32 | Float32
+    @payout : Int32
+    @paid_out : Int32
     @chip_stack_bet : ChipStack
     @chip_stack_winnings : ChipStack
     @chips : Array(Chip)
     @result : Result
+    @doubling_bet_left : Int32
 
     CHIP_DELAY = 0.13_f32
 
@@ -28,6 +30,8 @@ module Cards
       @result = Result::Push
       @placing_bet = false
       @clearing_bet = false
+      @doubling_bet = false
+      @doubling_bet_left = 0
       @confirmed_bet = false
       @settled_bet = false
       @leave_table = false
@@ -63,24 +67,31 @@ module Cards
       if !delay? && playing?
         playing_update(frame_time)
       elsif !confirmed_bet?
-        @chips.select(&.moved?).each do |chip|
-          @chips.delete(chip)
-          if placing_bet?
-            @chip_stack_bet.add(chip)
-          else
-            @chip_tray.add(chip)
-          end
-        end
-
-        clear_bet if clearing_bet?
         betting_update(frame_time)
       end
     end
 
+    def move_chips
+      @chips.select(&.moved?).each do |chip|
+        @chips.delete(chip)
+
+        if placing_bet?
+          @chip_stack_bet.add(chip)
+        else
+          @chip_tray.add(chip)
+        end
+      end
+    end
+
     def playing_update(_frame_time)
+      move_chips
+      double_bet if doubling_bet?
     end
 
     def betting_update(frame_time)
+      move_chips
+      clear_bet if clearing_bet?
+
       @placing_bet = false if @chips.empty?
 
       chip_tray.update(frame_time)
@@ -201,6 +212,37 @@ module Cards
       clear_chip(@chip_stack_bet) unless delay?
     end
 
+    def can_double_bet?
+      balance >= bet
+    end
+
+    def double_down
+      log(:double_down)
+      @doubling_bet = true
+      @doubling_bet_left = bet
+    end
+
+    def double_bet
+      log(:double_bet)
+      if chip = chip_tray.largest(@doubling_bet_left)
+        place_bet(chip)
+        @doubling_bet_left -= chip.value if doubling_bet?
+      end
+
+      if @doubling_bet_left == 0 && @chips.empty?
+        if placing_bet?
+          @placing_bet = false
+          delay(deal_delay)
+        elsif !hitting?
+          @hitting = true
+        else
+          @doubling_bet = false
+          hand_check
+          play_done if playing?
+        end
+      end
+    end
+
     def confirm_bet
       if bet > 0 && balance >= 0
         log(:confirm_bet, "confirmed bet: #{bet} balance: #{balance}")
@@ -209,6 +251,11 @@ module Cards
         # message to decrease bet, or buy in to increase balance
         log(:confirm_bet, "not enough chips, balance: #{balance} bet: #{bet}")
       end
+    end
+
+    def hand_check
+      return if doubling_bet?
+      super
     end
 
     def done(dealer : Dealer)
@@ -259,14 +306,13 @@ module Cards
     end
 
     def win(dealer : Dealer, payout_ratio : Int32 | Float32 = 1)
-      @payout = payout_ratio * bet
+      @payout = (payout_ratio * bet).to_i
       log(:win, "#{@payout}")
       @result = Result::Win
       @message = @result.to_s.downcase
     end
 
     def lose(dealer : Dealer)
-      # don't do anything, bet was already taken out of balance
       log(:lose, "(#{bet})")
       @result = Result::Lose
       @message = @result.to_s.downcase
@@ -296,12 +342,7 @@ module Cards
     end
 
     def paid?
-      @paid_out == @chip_stack_winnings.chip_value && (
-        @paid_out == @payout ||
-        # in case payout is greater than the lowest chip amount (Amount::One value of 1)
-        # such as winnings = 50, payout = 50.25
-        @paid_out + Chip::Amount.values.first.value > @payout
-      )
+      @paid_out == @chip_stack_winnings.chip_value && @paid_out == @payout
     end
 
     def pay_player_chip(dealer)
@@ -328,8 +369,6 @@ module Cards
     end
 
     def settle_bet(dealer : Dealer)
-      log(:settle_bet)
-
       @chips.select(&.moved?).each do |chip|
         @chips.delete(chip)
 
@@ -372,8 +411,6 @@ module Cards
     end
 
     def clear_table(discard_stack : CardStack)
-      log(:clear_table)
-
       if cleared_chips?
         super
       else

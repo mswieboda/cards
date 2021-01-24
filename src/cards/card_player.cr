@@ -252,7 +252,6 @@ module Cards
     end
 
     def cleared_table?
-      log(:cleared_table?, "cards: #{cards.map(&.short_name)} cci: #{@clearing_card_index}")
       cards.empty?
     end
 

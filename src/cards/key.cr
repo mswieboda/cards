@@ -27,6 +27,10 @@ module Cards
       Game::Key::Enter
     end
 
+    def self.double_down
+      Game::Key::D
+    end
+
     def self.confirm_bet_keys
       [Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter]
     end

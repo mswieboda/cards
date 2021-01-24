@@ -7,6 +7,10 @@ module Cards
         stand
       elsif Key.hit.pressed?
         hit
+      elsif !doubling_bet? && can_double_bet?
+        if Key.double_down.pressed?
+          double_down
+        end
       end
     end
 

@@ -8,11 +8,13 @@ module Cards
     DONE_DELAY = 0.69_f32
 
     def playing_update(_frame_time)
+      super
+
       # TODO: impl strategy, copy dealer's logic for now
       if hand_value >= 17 && !soft_17?
         stand
       else
-        hit
+        hit unless hitting?
       end
     end
 
