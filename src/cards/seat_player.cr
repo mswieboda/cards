@@ -1,12 +1,11 @@
 module Cards
   abstract class SeatPlayer < CardPlayer
     getter name : String
-    getter balance : Int32 | Float32
-    getter bet : Int32 | Float32
-    getter? placing_bet
     getter? confirmed_bet
     getter? settled_bet
     getter? leave_table
+    getter? placing_bet
+    getter? clearing_bet
 
     @payout : Int32 | Float32
     @paid_out : Int32 | Float32
@@ -23,12 +22,12 @@ module Cards
       Push
     end
 
-    def initialize(@name = "", seat = Seat.new, @balance = 0)
-      @bet = 0
+    def initialize(@name = "", seat = Seat.new, balance = 0)
       @payout = 0
       @paid_out = 0
       @result = Result::Push
       @placing_bet = false
+      @clearing_bet = false
       @confirmed_bet = false
       @settled_bet = false
       @leave_table = false
@@ -42,7 +41,7 @@ module Cards
         seat: seat,
         chip_tray: ChipTray.new(
           y: Main.screen_height - CardSpot.margin - Chip.height,
-          balance: @balance
+          balance: balance
         )
       )
     end
@@ -61,11 +60,19 @@ module Cards
 
       @chips.each(&.update(frame_time))
 
-      return if delay?
-
-      if playing?
+      if !delay? && playing?
         playing_update(frame_time)
-      elsif placing_bet? || !confirmed_bet?
+      elsif !confirmed_bet?
+        @chips.select(&.moved?).each do |chip|
+          @chips.delete(chip)
+          if placing_bet?
+            @chip_stack_bet.add(chip)
+          else
+            @chip_tray.add(chip)
+          end
+        end
+
+        clear_bet if clearing_bet?
         betting_update(frame_time)
       end
     end
@@ -74,12 +81,17 @@ module Cards
     end
 
     def betting_update(frame_time)
-      @chips.select(&.moved?).each do |chip|
-        @chips.delete(chip)
-        @chip_stack_bet.add(chip)
-      end
-
       @placing_bet = false if @chips.empty?
+
+      chip_tray.update(frame_time)
+    end
+
+    def bet
+      @chip_stack_bet.chip_value
+    end
+
+    def balance
+      @chip_tray.chip_value
     end
 
     def draw(screen_x = 0, screen_y = 0)
@@ -87,14 +99,14 @@ module Cards
 
       @chips.select { |c| c.y <= @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
 
-      last_y = draw_chips(screen_x, screen_y)
+      last_y = draw_bet(screen_x, screen_y)
       last_y = draw_name(screen_x, screen_y, last_y)
       last_y = draw_balance(screen_x, screen_y, last_y)
 
       @chips.select { |c| c.y > @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
     end
 
-    def draw_chips(screen_x = 0, screen_y = 0)
+    def draw_bet(screen_x = 0, screen_y = 0)
       mid_x = seat.x
 
       @chip_stack_bet.draw(screen_x, screen_y)
@@ -161,10 +173,8 @@ module Cards
     def new_hand
       super
 
-      @placing_bet = false
       @confirmed_bet = false
       @settled_bet = false
-      @bet = 0
       @payout = 0
       @paid_out = 0
       @result = Result::Push
@@ -175,18 +185,20 @@ module Cards
     end
 
     def place_bet(chip : Chip)
-      if balance - chip.value >= 0
-        @bet += chip.value
-        @balance -= chip.value
-        log(:place_bet, "placed bet: #{chip.value} new balance: #{balance}")
+      log(:place_bet, "placed bet: #{chip.value} new balance: #{balance}")
 
-        @placing_bet = true
-        chip.move(@chip_stack_bet.add_chip_position)
-        @chips << chip
-      else
-        # message to decrease bet, or buy in to increase balance
-        log(:place_bet, "not enough chips, balance: #{balance} bet: #{bet}")
+      @placing_bet = true
+      chip.move(@chip_stack_bet.add_chip_position)
+      @chips << chip
+    end
+
+    def clear_bet
+      if @chip_stack_bet.empty? && @chips.empty?
+        @clearing_bet = false
+        return
       end
+
+      clear_chip(@chip_stack_bet) unless delay?
     end
 
     def confirm_bet
@@ -251,9 +263,6 @@ module Cards
       log(:win, "#{@payout}")
       @result = Result::Win
       @message = @result.to_s.downcase
-
-      # add to balance
-      @balance += @payout + bet
     end
 
     def lose(dealer : Dealer)
@@ -267,8 +276,6 @@ module Cards
       log(:push)
       @result = Result::Push
       @message = @result.to_s.downcase
-
-      @balance += bet
     end
 
     def leave_table

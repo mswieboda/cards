@@ -1,6 +1,7 @@
 module Cards
   class ChipTray
     getter chip_stacks : Hash(Chip::Amount, ChipStack)
+    getter selected_chip : Chip | Nil
 
     @chip_amounts : Hash(Chip::Amount, Chip)
     @y : Int32 | Float32
@@ -44,6 +45,20 @@ module Cards
 
     def update(frame_time)
       @chip_stacks.each { |(_a, cs)| cs.update(frame_time) }
+
+      @selected_chip = nil
+
+      Chip::Amount.values.each { |amount| update_select_chip(amount) }
+    end
+
+    def update_select_chip(amount : Chip::Amount)
+      return if @selected_chip
+
+      if chip_stack = @chip_stacks[amount]
+        if Key.bet(amount).pressed? || chip_stack.selected?
+          @selected_chip = chip_stack.take if chip_stack.any?
+        end
+      end
     end
 
     def draw(screen_x, screen_y)
@@ -60,6 +75,10 @@ module Cards
           end
         end
       end
+    end
+
+    def chip_value
+      @chip_stacks.map { |(_a, chip_stack)| chip_stack.chip_value }.sum
     end
 
     def add_position(chip : Chip)
@@ -82,16 +101,6 @@ module Cards
           next if chip_stack.empty?
 
           return chip_stack.take
-        end
-      end
-    end
-
-    def selected_chip
-      @chip_stacks.each do |(amount, chip_stack)|
-        if chip_stack.selected?
-          if chip = chip_stack.selected_chip
-            return chip
-          end
         end
       end
     end

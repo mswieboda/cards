@@ -13,13 +13,16 @@ module Cards
     def betting_update(frame_time)
       super
 
-      chip_tray.update(frame_time)
-
       if chip = chip_tray.selected_chip
         place_bet(chip)
       end
 
+      toggle_clear_bet if Key.clear_bet.pressed?
       confirm_bet if Game::Keys.pressed?(Key.confirm_bet_keys)
+    end
+
+    def toggle_clear_bet
+      @clearing_bet = !@clearing_bet
     end
   end
 end

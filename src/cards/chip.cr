@@ -5,7 +5,6 @@ module Cards
 
     delegate :x, :x=, :y, :y=, to: position
     delegate :frame, :frames, to: @sprite
-    delegate :value, to: @amount
 
     @sprite : Game::Sprite
     @sprite_accent : Game::Sprite
@@ -16,7 +15,7 @@ module Cards
     HEIGHT = 16
     HEIGHT_DEPTH = 3
 
-    MOVEMENT_FRAMES = 20
+    MOVEMENT_FRAMES = 16
 
     enum Amount : UInt8
       One = 1
@@ -117,6 +116,10 @@ module Cards
 
     def height_depth
       self.class.height_depth
+    end
+
+    def value
+      @amount.value.to_i
     end
 
     def moving?
