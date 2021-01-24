@@ -88,8 +88,9 @@ module Cards
         if card = cards[1]
           if card.flipped?
             card.flip
-            play_done
             delay(action_delay)
+          else
+            play_done
           end
         end
       else
