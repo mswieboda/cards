@@ -20,21 +20,15 @@ module Cards
       super
 
       unless placing_bet?
-        if chip = Chip.largest(BET)
-          if place_bet(chip.value)
-            @placing_bet = true
-            chip.move(@chip_stack_bet.add_chip_position)
-            @chips << chip
+        if !confirmed_bet? && @chips.empty? && @chip_stack_bet.any?
+          confirm_bet
+        elsif @chip_stack_bet.empty?
+          if chip = chip_tray.largest(BET)
+            place_bet(chip)
+          else
+            leave_table
           end
-        else
-          # shouldn't happen, unless BET is < min Chip::Amount
-          raise "CpuPlayer bet of #{BET}, no chips found"
         end
-      end
-
-      if @chips.empty? && !confirmed_bet?
-        @placing_bet = false
-        confirm_bet
       end
     end
 

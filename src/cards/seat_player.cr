@@ -78,6 +78,8 @@ module Cards
         @chips.delete(chip)
         @chip_stack_bet.add(chip)
       end
+
+      @placing_bet = false if @chips.empty?
     end
 
     def draw(screen_x = 0, screen_y = 0)
@@ -172,16 +174,18 @@ module Cards
       "#{name} #{super}"
     end
 
-    def place_bet(bet = 1) : Bool
-      if balance - bet >= 0
-        @bet += bet
-        @balance -= bet
-        log(:place_bet, "placed bet: #{bet} new balance: #{balance}")
-        true
+    def place_bet(chip : Chip)
+      if balance - chip.value >= 0
+        @bet += chip.value
+        @balance -= chip.value
+        log(:place_bet, "placed bet: #{chip.value} new balance: #{balance}")
+
+        @placing_bet = true
+        chip.move(@chip_stack_bet.add_chip_position)
+        @chips << chip
       else
         # message to decrease bet, or buy in to increase balance
         log(:place_bet, "not enough chips, balance: #{balance} bet: #{bet}")
-        false
       end
     end
 

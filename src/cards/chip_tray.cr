@@ -74,6 +74,18 @@ module Cards
       end
     end
 
+    def largest(bet) : Chip | Nil
+      Chip::Amount.values.reverse.each do |amount|
+        next if amount.value > bet
+
+        if chip_stack = @chip_stacks[amount]
+          next if chip_stack.empty?
+
+          return chip_stack.take
+        end
+      end
+    end
+
     def selected_chip
       @chip_stacks.each do |(amount, chip_stack)|
         if chip_stack.selected?

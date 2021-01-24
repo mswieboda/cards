@@ -7,7 +7,7 @@ module Cards
     getter? selected
 
     delegate :x, :y, to: position
-    delegate :size, :empty?, to: chips
+    delegate :size, :empty?, :any?, to: chips
 
     @sprite_highlight : Game::Sprite
 
