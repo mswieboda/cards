@@ -137,8 +137,8 @@ module Cards
       end
 
       if player.hitting?
-        # player.hitting = false
-        player.deal(@deck_stack.take)
+        player.hitting = false
+        player.deal(@deck_stack)
         player.hand_check
       end
 
@@ -179,10 +179,10 @@ module Cards
     def settle_bet_clear_hands(player : CardPlayer)
       if player.is_a?(SeatPlayer)
         if seat_player = player.as(SeatPlayer)
-          if seat_player.settled_bets?
-            seat_player.clear_table(@discard_stack) unless seat_player.cleared_table?
-          else
+          if seat_player.settling_bets?
             seat_player.settle_bet(@dealer)
+          else
+            seat_player.clear_table(@discard_stack) unless seat_player.cleared_table?
           end
         end
       else
@@ -242,7 +242,7 @@ module Cards
     end
 
     def deal(player : CardPlayer)
-      player.deal(@deck_stack.take) unless player.dealt?
+      player.deal(@deck_stack) unless player.dealt?
 
       next_turn
     end

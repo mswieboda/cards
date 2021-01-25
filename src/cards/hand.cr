@@ -5,7 +5,7 @@ module Cards
 
     getter cards : Array(Card)
 
-    getter? playing
+    property? playing
     getter? played
     property? hitting
     getter? bust
@@ -13,7 +13,7 @@ module Cards
 
     property? confirmed_bet
     # getter? doubling_bet
-    getter? settled_bet
+    property? settling_bet
     getter message : String
 
     getter? clearing_table
@@ -49,7 +49,7 @@ module Cards
       # @doubling_bet = false
       # @doubling_bet_left = 0
       @confirmed_bet = false
-      @settled_bet = false
+      @settling_bet = true
       @message = ""
       @clearing_table = false
       @clearing_card_index = 0
@@ -156,28 +156,6 @@ module Cards
       text.draw
     end
 
-    def draw_balance(screen_x = 0, screen_y = 0, y = 0)
-      mid_x = seat.x
-
-      y = Main.screen_height
-
-      text = Game::Text.new(
-        text: "balance: #{balance}",
-        x: (screen_x + mid_x).to_i,
-        y: (screen_y + y).to_i,
-        size: 10,
-        spacing: 2,
-        color: Game::Color::Black,
-      )
-
-      text.x -= (text.width / 2_f32).to_i
-      text.y -= 2 * (text.height + (Card.margin / 2_f32)).to_i
-
-      text.draw
-
-      text.y + text.height
-    end
-
     # TODO: take this out, use SeatPlayer's log somehow, procs?
     def log_name
       self.class.to_s.split("::").last
@@ -201,8 +179,10 @@ module Cards
       !dealt?
     end
 
-    def deal(card : Card, flip = true)
+    def deal(card_stack : CardStack, flip = true)
       log(:deal)
+
+      card = card_stack.take
 
       card.flip if flip && card.flipped?
 
@@ -216,6 +196,7 @@ module Cards
 
       card.move(position)
       @cards << card
+      card
     end
 
     def check
@@ -237,7 +218,7 @@ module Cards
     end
 
     def cards_short_name
-      cards.map(&.short_name).join("")
+      cards.map(&.short_name).join(", ")
     end
 
     def bet
@@ -337,10 +318,22 @@ module Cards
       end
     end
 
+    def settled_bet?
+      return unless paid?
+
+      if lose?
+        @chip_stack_bet.empty?
+      elsif win?
+        @chip_stack_winnings.any?
+      elsif push?
+        true
+      end
+    end
+
     def settle_bet(dealer : Dealer, player : SeatPlayer)
-      if win? || push?
+      if win?
         pay_player_chip(dealer, player) unless paid?
-      elsif @chip_stack_bet.any?
+      elsif lose? && @chip_stack_bet.any?
         pay_dealer_chip(dealer, player)
       end
     end
@@ -390,7 +383,8 @@ module Cards
       play_done if playing?
     end
 
-    def clear_table(discard_stack : CardStack)
+    def clear_cards(discard_stack : CardStack)
+      log(:clear_table)
       unless cards.empty?
         if @clearing_card_index >= 0
           card = cards[@clearing_card_index]

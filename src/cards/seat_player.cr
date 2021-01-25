@@ -75,6 +75,8 @@ module Cards
 
       draw_hands(screen_x, screen_y)
 
+      # TODO: fix these so not overlapping, and not on top of chip tray
+      draw_balance(screen_x, screen_y)
       draw_name(screen_x, screen_y)
 
       # @chips.select { |c| c.y > @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
@@ -83,6 +85,28 @@ module Cards
 
     def draw_bets?
       true
+    end
+
+    def draw_balance(screen_x = 0, screen_y = 0)
+      mid_x = seat.x
+
+      y = Main.screen_height
+
+      text = Game::Text.new(
+        text: "balance: #{balance}",
+        x: (screen_x + mid_x).to_i,
+        y: (screen_y + y).to_i,
+        size: 10,
+        spacing: 2,
+        color: Game::Color::Black,
+      )
+
+      text.x -= (text.width / 2_f32).to_i
+      text.y -= 2 * (text.height + (Card.margin / 2_f32)).to_i
+
+      text.draw
+
+      text.y + text.height
     end
 
     def draw_name(screen_x = 0, screen_y = 0)
@@ -198,11 +222,12 @@ module Cards
       hands.all?(&.paid?)
     end
 
-    def settled_bets?
-      @chips.empty? && hands.all?(&.paid?)
+    def settling_bets?
+      hands.any?(&.settling_bet?)
     end
 
     def add_chip(chip : Chip)
+      log(:add_chip)
       @chips << chip
       delay(chip_delay)
     end
@@ -219,9 +244,10 @@ module Cards
           end
         end
 
-        hand.settle_bet(dealer, self)
+        hand.settle_bet(dealer, self) unless hand.settled_bet?
 
-        if hand.paid? && @chips.empty?
+        if @chips.empty? && hand.settled_bet?
+          hand.settling_bet = false
           @hand_index += 1 if @hand_index + 1 < hands.size
           delay(done_delay)
         end

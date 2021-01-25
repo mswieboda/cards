@@ -3,6 +3,7 @@ module Cards
     getter seat : Seat
     getter chip_tray : ChipTray
     getter hands : Array(Hand)
+    getter? playing
     getter? done
 
     @hand_index : Int32
@@ -12,10 +13,9 @@ module Cards
     DONE_DELAY = 1.69_f32
 
     def initialize(@seat = Seat.new, @chip_tray = ChipTray.new, @hands = [] of Hand)
+      @done = false
       @elapsed_delay_time = @delay_time = 0_f32
-
       @hands << Hand.new if @hands.empty?
-
       @hand_index = 0
 
       update_positions
@@ -120,24 +120,28 @@ module Cards
       hands.any?(&.hitting?)
     end
 
-    def hitting=(value : Boolean)
+    def hitting=(value : Bool)
       if hand = current_hand
         hand.hitting = value
       end
     end
 
-    def deal(card : Card)
+    def deal(card_stack : CardStack)
       log(:deal)
 
-      if hand = hands.find(&.undealt?)
-        hand.deal(card)
+      if hand = current_hand
+        hand.deal(card_stack)
         delay(deal_delay)
       end
     end
 
     def play
       log(:play)
-      @playing = true
+
+      if hand = current_hand
+        hand.playing = true
+      end
+
       hand_check
     end
 
@@ -157,7 +161,7 @@ module Cards
     end
 
     def clear_table(discard_stack : CardStack)
-      hands.each(&.clear_table(discard_stack))
+      hands.each(&.clear_cards(discard_stack))
     end
 
     def new_hand
@@ -168,6 +172,7 @@ module Cards
       hands.clear
       @hands << Hand.new
       @hand_index = 0
+      update_positions
     end
   end
 end

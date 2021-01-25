@@ -109,15 +109,12 @@ module Cards
       end
     end
 
-    def deal(card : Card)
+    def deal(card_stack : CardStack)
       log(:deal)
 
-      if hand = hands.find(&.undealt?)
-        hand.deal(card)
-
-        # make sure 2nd card gets double flipped for dealer, staying covered
+      if hand = current_hand
+        card = hand.deal(card_stack)
         card.flip if hand.size == 2 && !card.flipped?
-
         delay(deal_delay)
       end
     end
