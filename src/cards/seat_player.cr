@@ -1,62 +1,27 @@
 module Cards
   abstract class SeatPlayer < CardPlayer
     getter name : String
-    getter? confirmed_bet
-    getter? settled_bet
     getter? leave_table
     getter? placing_bet
     getter? clearing_bet
-    getter? doubling_bet
 
-    @payout : Int32
-    @paid_out : Int32
-    @chip_stack_bet : ChipStack
-    @chip_stack_winnings : ChipStack
     @chips : Array(Chip)
-    @result : Result
-    @doubling_bet_left : Int32
 
     CHIP_DELAY = 0.13_f32
 
-    enum Result
-      Lose
-      Win
-      Push
-    end
-
     def initialize(@name = "", seat = Seat.new, balance = 0)
-      @payout = 0
-      @paid_out = 0
-      @result = Result::Push
+      @chips = [] of Chip
+      @leave_table = false
       @placing_bet = false
       @clearing_bet = false
-      @doubling_bet = false
-      @doubling_bet_left = 0
-      @confirmed_bet = false
-      @settled_bet = false
-      @leave_table = false
-
-      @chip_stack_bet = ChipStack.new
-      @chip_stack_winnings = ChipStack.new
-
-      @chips = [] of Chip
 
       super(
         seat: seat,
         chip_tray: ChipTray.new(
-          y: Main.screen_height - CardSpot.margin - Chip.height,
+          y: Main.screen_height - Card.margin - Chip.height,
           balance: balance
         )
       )
-    end
-
-    def update_positions
-      super
-
-      @chip_stack_bet.x = @seat.x - Chip.width / 2_f32
-      @chip_stack_bet.y = @seat.y + CardSpot.height + CardSpot.margin
-      @chip_stack_winnings.x = @seat.x - Chip.width / 2_f32 - CardSpot.margin - Chip.width
-      @chip_stack_winnings.y = @seat.y + CardSpot.height + CardSpot.margin
     end
 
     def update(frame_time)
@@ -76,7 +41,9 @@ module Cards
         @chips.delete(chip)
 
         if placing_bet?
-          @chip_stack_bet.add(chip)
+          if hand = current_hand
+            hand.chip_stack_bet.add(chip)
+          end
         else
           @chip_tray.add(chip)
         end
@@ -85,7 +52,7 @@ module Cards
 
     def playing_update(_frame_time)
       move_chips
-      double_bet if doubling_bet?
+      # double_bet if doubling_bet?
     end
 
     def betting_update(frame_time)
@@ -97,52 +64,31 @@ module Cards
       chip_tray.update(frame_time)
     end
 
-    def bet
-      @chip_stack_bet.chip_value
-    end
-
     def balance
       @chip_tray.chip_value
     end
 
     def draw(screen_x = 0, screen_y = 0)
-      super
+      chip_tray.draw(screen_x, screen_y)
 
-      @chips.select { |c| c.y <= @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
+      # @chips.select { |c| c.y <= @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
 
-      last_y = draw_bet(screen_x, screen_y)
-      last_y = draw_name(screen_x, screen_y, last_y)
-      last_y = draw_balance(screen_x, screen_y, last_y)
+      draw_hands(screen_x, screen_y)
 
-      @chips.select { |c| c.y > @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
+      draw_name(screen_x, screen_y)
+
+      # @chips.select { |c| c.y > @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
+      @chips.each(&.draw(screen_x, screen_y))
     end
 
-    def draw_bet(screen_x = 0, screen_y = 0)
-      mid_x = seat.x
-
-      @chip_stack_bet.draw(screen_x, screen_y)
-      @chip_stack_winnings.draw(screen_x, screen_y)
-
-      y = @chip_stack_bet.y + Chip.height + (CardSpot.margin / 2_f32).to_i
-
-      text = Game::Text.new(
-        text: "bet: #{bet}",
-        x: (screen_x + mid_x).to_i,
-        y: (screen_y + y).to_i,
-        size: 10,
-        spacing: 2,
-        color: Game::Color::Black,
-      )
-
-      text.x -= (text.width / 2_f32).to_i
-
-      text.draw
-
-      text.y + text.height
+    def draw_bets?
+      true
     end
 
-    def draw_name(screen_x = 0, screen_y = 0, y = 0)
+    def draw_name(screen_x = 0, screen_y = 0)
       mid_x = seat.x
+
+      y = Main.screen_height
 
       text = Game::Text.new(
         text: name,
@@ -154,41 +100,11 @@ module Cards
       )
 
       text.x -= (text.width / 2_f32).to_i
-      text.y += (CardSpot.margin / 2_f32).to_i
+      text.y -= text.height + (Card.margin / 2_f32).to_i
 
       text.draw
 
       text.y + text.height
-    end
-
-    def draw_balance(screen_x = 0, screen_y = 0, y = 0)
-      mid_x = seat.x
-
-      text = Game::Text.new(
-        text: "balance: #{balance}",
-        x: (screen_x + mid_x).to_i,
-        y: (screen_y + y).to_i,
-        size: 10,
-        spacing: 2,
-        color: Game::Color::Black,
-      )
-
-      text.x -= (text.width / 2_f32).to_i
-      text.y += (CardSpot.margin / 2_f32).to_i
-
-      text.draw
-
-      text.y + text.height
-    end
-
-    def new_hand
-      super
-
-      @confirmed_bet = false
-      @settled_bet = false
-      @payout = 0
-      @paid_out = 0
-      @result = Result::Push
     end
 
     def log_name
@@ -198,130 +114,75 @@ module Cards
     def place_bet(chip : Chip)
       log(:place_bet, "placed bet: #{chip.value} new balance: #{balance}")
 
-      @placing_bet = true
-      chip.move(@chip_stack_bet.add_chip_position)
-      @chips << chip
+      if hand = current_hand
+        @placing_bet = true
+
+        chip.move(hand.chip_stack_bet.add_chip_position)
+        @chips << chip
+      end
     end
 
     def clear_bet
-      if @chip_stack_bet.empty? && @chips.empty?
-        @clearing_bet = false
-        return
-      end
-
-      clear_chip(@chip_stack_bet) unless delay?
-    end
-
-    def can_double_bet?
-      balance >= bet
-    end
-
-    def double_down
-      log(:double_down)
-      @doubling_bet = true
-      @doubling_bet_left = bet
-    end
-
-    def double_bet
-      log(:double_bet)
-      if chip = chip_tray.largest(@doubling_bet_left)
-        place_bet(chip)
-        @doubling_bet_left -= chip.value if doubling_bet?
-      end
-
-      if @doubling_bet_left == 0 && @chips.empty?
-        if placing_bet?
-          @placing_bet = false
-          delay(deal_delay)
-        elsif !hitting?
-          @hitting = true
-        else
-          @doubling_bet = false
-          hand_check
-          play_done if playing?
+      if hand = current_hand
+        if hand.chip_stack_bet.empty? && @chips.empty?
+          @clearing_bet = false
+          return
         end
+
+        clear_chip(hand.chip_stack_bet) unless delay?
       end
+    end
+
+    # def can_double_bet?
+    #   balance >= bet
+    # end
+
+    # def double_down
+    #   log(:double_down)
+    #   @doubling_bet = true
+    #   @doubling_bet_left = bet
+    # end
+
+    # def double_bet
+    #   log(:double_bet)
+    #   if chip = chip_tray.largest(@doubling_bet_left)
+    #     place_bet(chip)
+    #     @doubling_bet_left -= chip.value if doubling_bet?
+    #   end
+
+    #   if @doubling_bet_left == 0 && @chips.empty?
+    #     if placing_bet?
+    #       @placing_bet = false
+    #       delay(deal_delay)
+    #     elsif !hitting?
+    #       @hitting = true
+    #     else
+    #       @doubling_bet = false
+    #       hand_check
+    #       play_done if playing?
+    #     end
+    #   end
+    # end
+
+    def confirmed_bet?
+      hands.all?(&.confirmed_bet?)
     end
 
     def confirm_bet
-      if bet > 0 && balance >= 0
-        log(:confirm_bet, "confirmed bet: #{bet} balance: #{balance}")
-        @confirmed_bet = true
-      else
-        # message to decrease bet, or buy in to increase balance
-        log(:confirm_bet, "not enough chips, balance: #{balance} bet: #{bet}")
+      if hand = current_hand
+        if hand.bet > 0 && balance >= 0
+          log(:confirm_bet, "confirmed bet: #{hand.bet} balance: #{balance}")
+          hand.confirmed_bet = true
+        else
+          # message to decrease bet, or buy in to increase balance
+          log(:confirm_bet, "not enough chips, balance: #{balance} bet: #{hand.bet}")
+        end
       end
-    end
-
-    def hand_check
-      return if doubling_bet?
-      super
     end
 
     def done(dealer : Dealer)
       super
-
-      log(:done, "player: #{hand_display} #{cards.map(&.short_name)}")
-      log(:done, "dealer: #{dealer.hand_display} #{dealer.cards.map(&.short_name)}")
-
-      # determine winnings/losings
-      if bust?
-        log(:done, "player bust: lose")
-        lose(dealer)
-      elsif dealer.bust?
-        if blackjack?
-          log(:done, "dealer bust, player blackjack: win")
-          win(dealer, Blackjack.blackjack_payout_ratio)
-        else
-          log(:done, "dealer bust: win")
-          win(dealer)
-        end
-      else
-        if blackjack?
-          if dealer.blackjack?
-            log(:done, "player and dealer blackjack: push")
-            push(dealer)
-          else
-            log(:done, "player blackjack: win")
-            win(dealer, Blackjack.blackjack_payout_ratio)
-          end
-        else
-          if hand_value > dealer.hand_value
-            log(:done, "player has more: win")
-            win(dealer)
-          elsif hand_value < dealer.hand_value
-            log(:done, "player has less: lose")
-            lose(dealer)
-          else
-            if dealer.blackjack?
-              log(:done, "same value, dealer blackjack: lose")
-              lose(dealer)
-            else
-              log(:done, "same value, push: lose")
-              push(dealer)
-            end
-          end
-        end
-      end
-    end
-
-    def win(dealer : Dealer, payout_ratio : Int32 | Float32 = 1)
-      @payout = (payout_ratio * bet).to_i
-      log(:win, "#{@payout}")
-      @result = Result::Win
-      @message = @result.to_s.downcase
-    end
-
-    def lose(dealer : Dealer)
-      log(:lose, "(#{bet})")
-      @result = Result::Lose
-      @message = @result.to_s.downcase
-    end
-
-    def push(dealer : Dealer)
-      log(:push)
-      @result = Result::Push
-      @message = @result.to_s.downcase
+      hands.each(&.done(dealer))
     end
 
     def leave_table
@@ -333,69 +194,42 @@ module Cards
       CHIP_DELAY
     end
 
-    def cleared_table?
-      super && cleared_chips?
-    end
-
-    def cleared_chips?
-      @chip_stack_winnings.empty? && @chip_stack_bet.empty? && @chips.empty?
-    end
-
     def paid?
-      @paid_out == @chip_stack_winnings.chip_value && @paid_out == @payout
+      hands.all?(&.paid?)
     end
 
-    def pay_player_chip(dealer)
-      if chip = Chip.largest(@payout - @paid_out)
-        @paid_out += chip.value
-
-        pay_chip(chip: chip, dealer: dealer, from_dealer: true)
-      end
+    def settled_bets?
+      @chips.empty? && hands.all?(&.paid?)
     end
 
-    def pay_dealer_chip(dealer)
-      chip = @chip_stack_bet.take
-
-      pay_chip(chip: chip, dealer: dealer)
-    end
-
-    def pay_chip(chip : Chip, dealer : Dealer, from_dealer = false)
-      if position = dealer.chip_tray.add_position(chip)
-        chip.position = position if from_dealer
-        @chips << chip
-        chip.move(from_dealer ? @chip_stack_winnings.add_chip_position : position)
-        delay(chip_delay)
-      end
+    def add_chip(chip : Chip)
+      @chips << chip
+      delay(chip_delay)
     end
 
     def settle_bet(dealer : Dealer)
-      @chips.select(&.moved?).each do |chip|
-        @chips.delete(chip)
+      if hand = current_hand
+        @chips.select(&.moved?).each do |chip|
+          @chips.delete(chip)
 
-        if @result.win? || @result.push?
-          @chip_stack_winnings.add(chip)
-        else
-          dealer.chip_tray.add(chip)
+          if hand.win? || hand.push?
+            hand.chip_stack_winnings.add(chip)
+          else
+            dealer.chip_tray.add(chip)
+          end
         end
-      end
 
-      if @result.win? || @result.push?
-        pay_player_chip(dealer) unless paid?
+        hand.settle_bet(dealer, self)
 
-        if paid? && @chips.empty?
-          @settled_bet = true
+        if hand.paid? && @chips.empty?
+          @hand_index += 1 if @hand_index + 1 < hands.size
           delay(done_delay)
         end
-      else
-        if @chip_stack_bet.empty?
-          if @chips.empty?
-            @settled_bet = true
-            delay(action_delay)
-          end
-        else
-          pay_dealer_chip(dealer)
-        end
       end
+    end
+
+    def cleared_chips?
+      @chips.empty? && hands.all?(&.cleared_chips?)
     end
 
     def clear_chip(chip_stack : ChipStack)
@@ -414,8 +248,10 @@ module Cards
       if cleared_chips?
         super
       else
-        clear_chip(@chip_stack_winnings)
-        clear_chip(@chip_stack_bet)
+        hands.each do |hand|
+          clear_chip(hand.chip_stack_winnings)
+          clear_chip(hand.chip_stack_bet)
+        end
 
         @chips.select(&.moved?).each do |chip|
           @chips.delete(chip)

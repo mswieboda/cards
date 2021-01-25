@@ -4,13 +4,17 @@ module Cards
   class Player < SeatPlayer
     def playing_update(_frame_time)
       if Key.stand.pressed?
-        stand
-      elsif Key.hit.pressed?
-        hit
-      elsif !doubling_bet? && can_double_bet?
-        if Key.double_down.pressed?
-          double_down
+        if hand = current_hand
+          hand.stand
         end
+      elsif Key.hit.pressed?
+        if hand = current_hand
+          hand.hit
+        end
+      # elsif !doubling_bet? && can_double_bet?
+      #   if Key.double_down.pressed?
+      #     double_down
+      #   end
       end
     end
 

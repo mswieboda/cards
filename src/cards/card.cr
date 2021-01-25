@@ -6,7 +6,7 @@ module Cards
     property suit : Suit
     property? flipped
 
-    delegate :x, :y, to: position
+    delegate :x, :x=, :y, :y=, to: position
 
     @move_to : Nil | Game::Vector
     @move_delta : Game::Vector
@@ -15,6 +15,7 @@ module Cards
     WIDTH = 64
     HEIGHT = 88
     HEIGHT_DEPTH = 0.666_f32
+    MARGIN = 10
 
     DROP_SHADOW = 1
 
@@ -35,6 +36,10 @@ module Cards
 
     def self.height_depth
       HEIGHT_DEPTH
+    end
+
+    def self.margin
+      MARGIN
     end
 
     def clone : Card

@@ -5,7 +5,7 @@ module Cards
     @manager : Manager
 
     BLACKJACK_PAYOUT_RATIO = 1.5_f32 # 3/2
-    SIDE_MARGIN = CardSpot.width * 2
+    SIDE_MARGIN = Card.width * 2
 
     def initialize
       super
@@ -14,7 +14,7 @@ module Cards
 
       seats = [] of Seat
       seats << Seat.new(
-        x: Main.screen_width - SIDE_MARGIN - CardSpot.width - CardSpot.margin,
+        x: Main.screen_width - SIDE_MARGIN - Card.width - Card.margin,
         y: Main.screen_height / 2_f32
       )
       mid_seat = Seat.new(
@@ -23,7 +23,7 @@ module Cards
       )
       seats << mid_seat
       seats << Seat.new(
-        x: SIDE_MARGIN + CardSpot.width + CardSpot.margin,
+        x: SIDE_MARGIN + Card.width + Card.margin,
         y: Main.screen_height / 2_f32
       )
 

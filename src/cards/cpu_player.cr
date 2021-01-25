@@ -11,10 +11,12 @@ module Cards
       super
 
       # TODO: impl strategy, copy dealer's logic for now
-      if hand_value >= 17 && !soft_17?
-        stand
-      else
-        hit unless hitting?
+      if hand = current_hand
+        if hand.value >= 17 && !hand.soft_17?
+          hand.stand
+        else
+          hand.hit unless hand.hitting?
+        end
       end
     end
 
@@ -22,13 +24,15 @@ module Cards
       super
 
       unless placing_bet?
-        if !confirmed_bet? && @chips.empty? && @chip_stack_bet.any?
-          confirm_bet
-        elsif @chip_stack_bet.empty?
-          if chip = chip_tray.largest(BET)
-            place_bet(chip)
-          else
-            leave_table
+        if hand = current_hand
+          if !confirmed_bet? && @chips.empty? && hand.chip_stack_bet.any?
+            confirm_bet
+          elsif hand.chip_stack_bet.empty?
+            if chip = chip_tray.largest(BET)
+              place_bet(chip)
+            else
+              leave_table
+            end
           end
         end
       end

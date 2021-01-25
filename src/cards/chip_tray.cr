@@ -37,8 +37,8 @@ module Cards
 
     def update_positions(seat : Seat)
       @chip_stacks.each_with_index do |(amount, chip_stack), index|
-        start_x = seat.x - Chip::Amount.values.size / 2_f32 * (ChipStack.width + CardSpot.margin) + CardSpot.margin / 2_f32
-        chip_stack.x = start_x + index * (ChipStack.width + CardSpot.margin)
+        start_x = seat.x - Chip::Amount.values.size / 2_f32 * (ChipStack.width + Card.margin) + Card.margin / 2_f32
+        chip_stack.x = start_x + index * (ChipStack.width + Card.margin)
         chip_stack.y = @y
       end
     end

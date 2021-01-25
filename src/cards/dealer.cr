@@ -14,16 +14,10 @@ module Cards
       super(
         seat: seat,
         chip_tray: ChipTray.new(
-          y: CardSpot.margin,
+          y: Card.margin,
           balance: 3000,
         )
       )
-    end
-
-    def draw(screen_x = 0, screen_y = 0)
-      seat.draw(screen_x, screen_y)
-
-      super
     end
 
     def draw_hand_display(screen_x = 0, screen_y = 0, y = seat.y)
@@ -40,7 +34,7 @@ module Cards
         )
 
         text.x -= (text.width / 2_f32).to_i
-        text.y -= (CardSpot.margin + text.height).to_i
+        text.y -= (Card.margin + text.height).to_i
 
         text.draw
 
@@ -56,28 +50,76 @@ module Cards
       return if delay?
 
       if playing? && !hitting?
-        if card = cards[1]
-          if card.flipped?
-            card.flip
-            delay(action_delay)
-          else
-            log(:update, "playing, hand: #{hand_display} cards: #{cards.map(&.short_name)}")
-
-            if hand_value >= 17 && !soft_17?
-              stand
+        if hand = current_hand
+          if card = hand.cards[1]
+            if card.flipped?
+              card.flip
+              delay(action_delay)
             else
-              hit
+              log(:update, "playing, hand: #{hand_display} cards: #{cards_short_name}")
+
+              if hand.value >= 17 && !hand.soft_17?
+                hand.stand
+              else
+                hand.hit
+              end
             end
           end
         end
       end
     end
 
-    def deal(card : Card)
-      super
+    def hand_display
+      if hand = current_hand
+        hand.value
+      else
+        0
+      end
+    end
 
-      # make sure 2nd card gets double flipped for dealer, staying covered
-      card.flip if cards.size == 2 && !card.flipped?
+    def hand_value
+      if hand = current_hand
+        hand.value
+      else
+        0
+      end
+    end
+
+    def cards_short_name
+      if hand = current_hand
+        hand.cards_short_name
+      else
+        ""
+      end
+    end
+
+    def bust?
+      if hand = current_hand
+        hand.bust?
+      else
+        false
+      end
+    end
+
+    def blackjack?
+      if hand = current_hand
+        hand.blackjack?
+      else
+        false
+      end
+    end
+
+    def deal(card : Card)
+      log(:deal)
+
+      if hand = hands.find(&.undealt?)
+        hand.deal(card)
+
+        # make sure 2nd card gets double flipped for dealer, staying covered
+        card.flip if hand.size == 2 && !card.flipped?
+
+        delay(deal_delay)
+      end
     end
 
     def play(all_busted_or_blackjack)
@@ -85,12 +127,14 @@ module Cards
 
       if all_busted_or_blackjack
         # flip card, and end turn
-        if card = cards[1]
-          if card.flipped?
-            card.flip
-            delay(action_delay)
-          else
-            play_done
+        if hand = current_hand
+          if card = hand.cards[1]
+            if card.flipped?
+              card.flip
+              delay(action_delay)
+            else
+              hand.play_done
+            end
           end
         end
       else
