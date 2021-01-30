@@ -13,8 +13,8 @@ module Cards
         elsif !doubling_bet? && can_double_bet?
           if Key.double_down.pressed?
             double_down
-          elsif Key.split.pressed?
-            # hand.split
+          elsif can_split? && Key.split.pressed?
+            split
           end
         end
       end

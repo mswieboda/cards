@@ -5,9 +5,11 @@ module Cards
     getter? placing_bet
     getter? clearing_bet
     getter? doubling_bet
+    getter? splitting
 
     @chips : Array(Chip)
     @doubling_bet_left : Int32
+    @split_hand_index : Int32
 
     CHIP_DELAY = 0.13_f32
 
@@ -18,6 +20,8 @@ module Cards
       @clearing_bet = false
       @doubling_bet = false
       @doubling_bet_left = 0
+      @splitting = false
+      @split_hand_index = 0
 
       super(
         seat: seat,
@@ -40,12 +44,16 @@ module Cards
       end
     end
 
+    def betting_hand
+      splitting? && doubling_bet? ? @hands[@split_hand_index] : current_hand
+    end
+
     def move_chips
       @chips.select(&.moved?).each do |chip|
         @chips.delete(chip)
 
         if placing_bet?
-          if hand = current_hand
+          if hand = betting_hand
             hand.chip_stack_bet.add(chip)
           end
         else
@@ -142,7 +150,7 @@ module Cards
     def place_bet(chip : Chip)
       log(:place_bet, "placed bet: #{chip.value} new balance: #{balance}")
 
-      if hand = current_hand
+      if hand = betting_hand
         @placing_bet = true
 
         chip.move(hand.chip_stack_bet.add_chip_position)
@@ -202,6 +210,28 @@ module Cards
           end
         end
       end
+    end
+
+    def can_split?
+      if hand = current_hand
+        hand.cards.size == 2 && hand.cards[0].rank == hand.cards[1].rank
+      else
+        false
+      end
+    end
+
+    def split
+      log(:double_down)
+      @doubling_bet = true
+      @splitting = true
+      @hands << Hand.new
+      @split_hand_index = @hands.size - 1
+
+      if hand = current_hand
+        @doubling_bet_left = hand.bet
+      end
+
+      update_positions
     end
 
     def confirmed_bet?
