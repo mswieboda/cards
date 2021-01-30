@@ -73,8 +73,10 @@ module Cards
 
     def update_positions
       @cards.each_with_index do |card, index|
-        start_x = @x - Card.margin / 2_f32 - Card.width
-        card.x = start_x + index * (ChipStack.width + Card.margin)
+        x = @x - Card.margin / 2_f32 - Card.width + [index, 1].min * (Card.width + Card.margin)
+        x += 2 * Card.margin * (index - 1) if index >= 2
+
+        card.x = x
         card.y = @y
       end
 

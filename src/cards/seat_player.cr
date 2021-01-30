@@ -44,16 +44,12 @@ module Cards
       end
     end
 
-    def betting_hand
-      splitting? && doubling_bet? ? @hands[@split_hand_index] : current_hand
-    end
-
     def move_chips
       @chips.select(&.moved?).each do |chip|
         @chips.delete(chip)
 
         if placing_bet?
-          if hand = betting_hand
+          if hand = current_hand
             chip_stack = doubling_bet? ? hand.chip_stack_bet_double : hand.chip_stack_bet
             chip_stack.add(chip)
           end
@@ -151,7 +147,7 @@ module Cards
     def place_bet(chip : Chip)
       log(:place_bet, "placed bet: #{chip.value} new balance: #{balance}")
 
-      if hand = betting_hand
+      if hand = current_hand
         @placing_bet = true
 
         chip_stack = doubling_bet? ? hand.chip_stack_bet_double : hand.chip_stack_bet
