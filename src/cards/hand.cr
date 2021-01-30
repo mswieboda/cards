@@ -19,7 +19,9 @@ module Cards
 
     # @log : Symbol, String, String | Nil -> Nil
     getter chip_stack_bet : ChipStack
+    getter chip_stack_bet_double : ChipStack
     getter chip_stack_winnings : ChipStack
+
     @payout : Int32
     @paid_out : Int32
     @result : Result
@@ -51,6 +53,7 @@ module Cards
       @clearing_card_index = 0
 
       @chip_stack_bet = ChipStack.new
+      @chip_stack_bet_double = ChipStack.new
       @chip_stack_winnings = ChipStack.new
 
       update_positions
@@ -77,6 +80,10 @@ module Cards
 
       @chip_stack_bet.x = x - Chip.width / 2_f32
       @chip_stack_bet.y = y + Card.height + Card.margin
+
+      @chip_stack_bet_double.x = x - Chip.width / 2_f32 + Card.margin + Chip.width
+      @chip_stack_bet_double.y = y + Card.height + Card.margin
+
       @chip_stack_winnings.x = x - Chip.width / 2_f32 - Card.margin - Chip.width
       @chip_stack_winnings.y = y + Card.height + Card.margin
     end
@@ -134,6 +141,7 @@ module Cards
 
     def draw_bet(screen_x = 0, screen_y = 0)
       @chip_stack_bet.draw(screen_x, screen_y)
+      @chip_stack_bet_double.draw(screen_x, screen_y)
       @chip_stack_winnings.draw(screen_x, screen_y)
 
       y = @chip_stack_bet.y + Chip.height + (Card.margin / 2_f32).to_i
@@ -218,7 +226,7 @@ module Cards
     end
 
     def bet
-      @chip_stack_bet.chip_value
+      @chip_stack_bet.chip_value + @chip_stack_bet_double.chip_value
     end
 
     def done(dealer : Dealer)
@@ -299,8 +307,8 @@ module Cards
       end
     end
 
-    def pay_dealer_chip(dealer : Dealer, player : SeatPlayer)
-      chip = @chip_stack_bet.take
+    def pay_dealer_chip(dealer : Dealer, player : SeatPlayer, chip_stack : ChipStack)
+      chip = chip_stack.take
 
       pay_chip(chip: chip, dealer: dealer, player: player)
     end
@@ -329,8 +337,9 @@ module Cards
     def settle_bet(dealer : Dealer, player : SeatPlayer)
       if win?
         pay_player_chip(dealer, player) unless paid?
-      elsif lose? && @chip_stack_bet.any?
-        pay_dealer_chip(dealer, player)
+      elsif lose?
+        pay_dealer_chip(dealer, player, @chip_stack_bet) if @chip_stack_bet.any?
+        pay_dealer_chip(dealer, player, @chip_stack_bet_double) if @chip_stack_bet_double.any?
       end
     end
 

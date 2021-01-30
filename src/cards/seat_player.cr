@@ -54,7 +54,8 @@ module Cards
 
         if placing_bet?
           if hand = betting_hand
-            hand.chip_stack_bet.add(chip)
+            chip_stack = doubling_bet? ? hand.chip_stack_bet_double : hand.chip_stack_bet
+            chip_stack.add(chip)
           end
         else
           @chip_tray.add(chip)
@@ -153,19 +154,24 @@ module Cards
       if hand = betting_hand
         @placing_bet = true
 
-        chip.move(hand.chip_stack_bet.add_chip_position)
+        chip_stack = doubling_bet? ? hand.chip_stack_bet_double : hand.chip_stack_bet
+        chip.move(chip_stack.add_chip_position)
+
         @chips << chip
       end
     end
 
     def clear_bet
       if hand = current_hand
-        if hand.chip_stack_bet.empty? && @chips.empty?
+        if hand.chip_stack_bet.empty? && hand.chip_stack_bet_double.empty? && @chips.empty?
           @clearing_bet = false
           return
         end
 
-        clear_chip(hand.chip_stack_bet) unless delay?
+        unless delay?
+          clear_chip(hand.chip_stack_bet)
+          clear_chip(hand.chip_stack_bet_double)
+        end
       end
     end
 
@@ -331,6 +337,7 @@ module Cards
         hands.each do |hand|
           clear_chip(hand.chip_stack_winnings)
           clear_chip(hand.chip_stack_bet)
+          clear_chip(hand.chip_stack_bet_double)
         end
 
         @chips.select(&.moved?).each do |chip|
