@@ -5,17 +5,15 @@ module Cards
     def playing_update(_frame_time)
       super
 
-      if hand = current_hand
-        if Key.stand.pressed?
-          hand.stand
-        elsif Key.hit.pressed?
-          hand.hit
-        elsif !doubling_bet? && can_double_bet?
-          if Key.double_down.pressed?
-            double_down
-          elsif can_split? && Key.split.pressed?
-            split
-          end
+      if Key.stand.pressed?
+        stand
+      elsif Key.hit.pressed?
+        hit
+      elsif !doubling_bet? && can_double_bet?
+        if Key.double_down.pressed?
+          double_down
+        elsif can_split? && Key.split.pressed?
+          split
         end
       end
     end

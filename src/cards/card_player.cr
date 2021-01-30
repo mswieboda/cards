@@ -165,6 +165,7 @@ module Cards
 
       if hand = current_hand
         hand.check
+        next_hand if hand.played?
       end
     end
 

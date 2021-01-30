@@ -13,9 +13,9 @@ module Cards
       # TODO: impl strategy, copy dealer's logic for now
       if hand = current_hand
         if hand.value >= 17 && !hand.soft_17?
-          hand.stand
+          stand
         else
-          hand.hit unless hand.hitting?
+          hit unless hand.hitting?
         end
       end
     end

@@ -180,6 +180,20 @@ module Cards
       end
     end
 
+    def stand
+      if hand = current_hand
+        hand.stand
+        next_hand if hand.played?
+      end
+    end
+
+    def hit
+      if hand = current_hand
+        hand.hit
+        next_hand if hand.played?
+      end
+    end
+
     def can_double_bet?
       if hand = current_hand
         balance >= hand.bet
@@ -217,8 +231,9 @@ module Cards
             if hand = current_hand
               if splitting?
                 delay(action_delay)
-              else
+              else # assume a double down
                 hand.play_done
+                next_hand if hand.played?
                 delay(done_delay)
               end
             end
