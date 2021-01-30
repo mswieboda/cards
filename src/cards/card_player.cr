@@ -33,9 +33,9 @@ module Cards
 
     def update_positions
       chip_tray.update_positions(@seat)
-      hands.each do |hand|
+      hands.each_with_index do |hand, index|
         hand.x = @seat.x
-        hand.y = @seat.y
+        hand.y = @seat.y + index * (Card.margin + Card.height)
       end
     end
 
@@ -126,11 +126,22 @@ module Cards
       end
     end
 
+    def next_hand
+      @hand_index += 1 unless @hand_index + 1 >= @hands.size
+    end
+
+    def next_turn
+      @hand_index = 0
+    end
+
     def deal(card_stack : CardStack)
       log(:deal)
 
       if hand = current_hand
         hand.deal(card_stack)
+
+        next_hand
+
         delay(deal_delay)
       end
     end
@@ -147,7 +158,10 @@ module Cards
 
     def hand_check
       log(:hand_check)
-      hands.each(&.check)
+
+      if hand = current_hand
+        hand.check
+      end
     end
 
     def done(_dealer : Dealer)

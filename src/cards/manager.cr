@@ -87,6 +87,8 @@ module Cards
     end
 
     def next_turn
+      turn_player.next_turn
+
       @turn_index += 1
       @turn_index = 0 if @turn_index >= players.size
     end

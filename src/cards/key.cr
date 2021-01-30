@@ -31,6 +31,10 @@ module Cards
       Game::Key::D
     end
 
+    def self.split
+      Game::Key::S
+    end
+
     def self.confirm_bet_keys
       [Game::Key::Space, Game::Key::LShift, Game::Key::RShift, Game::Key::Enter]
     end

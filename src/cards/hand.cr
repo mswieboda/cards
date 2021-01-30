@@ -12,7 +12,6 @@ module Cards
     getter? blackjack
 
     property? confirmed_bet
-    # getter? doubling_bet
     property? settling_bet
     getter message : String
 
@@ -24,7 +23,6 @@ module Cards
     @payout : Int32
     @paid_out : Int32
     @result : Result
-    # @doubling_bet_left : Int32
     @clearing_card_index : Int32
 
     delegate :size, :empty?, :any?, to: cards
@@ -46,8 +44,6 @@ module Cards
       @payout = 0
       @paid_out = 0
       @result = Result::Push
-      # @doubling_bet = false
-      # @doubling_bet_left = 0
       @confirmed_bet = false
       @settling_bet = true
       @message = ""

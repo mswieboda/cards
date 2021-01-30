@@ -4,8 +4,10 @@ module Cards
     getter? leave_table
     getter? placing_bet
     getter? clearing_bet
+    getter? doubling_bet
 
     @chips : Array(Chip)
+    @doubling_bet_left : Int32
 
     CHIP_DELAY = 0.13_f32
 
@@ -14,6 +16,8 @@ module Cards
       @leave_table = false
       @placing_bet = false
       @clearing_bet = false
+      @doubling_bet = false
+      @doubling_bet_left = 0
 
       super(
         seat: seat,
@@ -52,7 +56,7 @@ module Cards
 
     def playing_update(_frame_time)
       move_chips
-      # double_bet if doubling_bet?
+      double_bet if doubling_bet?
     end
 
     def betting_update(frame_time)
@@ -157,36 +161,48 @@ module Cards
       end
     end
 
-    # def can_double_bet?
-    #   balance >= bet
-    # end
+    def can_double_bet?
+      if hand = current_hand
+        balance >= hand.bet
+      else
+        false
+      end
+    end
 
-    # def double_down
-    #   log(:double_down)
-    #   @doubling_bet = true
-    #   @doubling_bet_left = bet
-    # end
+    def double_down
+      log(:double_down)
+      @doubling_bet = true
 
-    # def double_bet
-    #   log(:double_bet)
-    #   if chip = chip_tray.largest(@doubling_bet_left)
-    #     place_bet(chip)
-    #     @doubling_bet_left -= chip.value if doubling_bet?
-    #   end
+      if hand = current_hand
+        @doubling_bet_left = hand.bet
+      end
+    end
 
-    #   if @doubling_bet_left == 0 && @chips.empty?
-    #     if placing_bet?
-    #       @placing_bet = false
-    #       delay(deal_delay)
-    #     elsif !hitting?
-    #       @hitting = true
-    #     else
-    #       @doubling_bet = false
-    #       hand_check
-    #       play_done if playing?
-    #     end
-    #   end
-    # end
+    def double_bet
+      if chip = chip_tray.largest(@doubling_bet_left)
+        place_bet(chip)
+        @doubling_bet_left -= chip.value
+      end
+
+      if @doubling_bet_left == 0 && @chips.empty?
+        if hand = current_hand
+          if placing_bet?
+            @placing_bet = false
+            delay(deal_delay)
+          elsif !hand.hitting?
+            hand.hitting = true
+          else
+            @doubling_bet = false
+            hand_check
+
+            if hand = current_hand
+              hand.play_done if hand.playing?
+              delay(done_delay)
+            end
+          end
+        end
+      end
+    end
 
     def confirmed_bet?
       hands.all?(&.confirmed_bet?)
@@ -207,6 +223,14 @@ module Cards
     def done(dealer : Dealer)
       super
       hands.each(&.done(dealer))
+    end
+
+    def new_hand
+      super
+      log(:new_hand)
+
+      @doubling_bet = false
+      @doubling_bet_left = 0
     end
 
     def leave_table
