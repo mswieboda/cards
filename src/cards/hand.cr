@@ -185,13 +185,11 @@ module Cards
       !dealt?
     end
 
-    def deal(card_stack : CardStack, flip = true)
-      log(:deal)
+    def take : Card
+      @cards.pop
+    end
 
-      card = card_stack.take
-
-      card.flip if flip && card.flipped?
-
+    def add_card_position
       x = @x - Card.margin / 2_f32 - Card.width + [cards.size, 1].min * (Card.width + Card.margin)
       x += 2 * Card.margin * (cards.size - 1) if cards.size >= 2
 
@@ -199,8 +197,16 @@ module Cards
         x: x,
         y: @y
       )
+    end
 
-      card.move(position)
+    def deal(card_stack : CardStack, flip = true)
+      log(:deal)
+
+      card = card_stack.take
+
+      card.flip if flip && card.flipped?
+
+      card.move(add_card_position)
       @cards << card
       card
     end
@@ -319,7 +325,7 @@ module Cards
       if position = dealer.chip_tray.add_position(chip)
         chip.position = position if from_dealer
 
-        chip.move(from_dealer ? @chip_stack_winnings.add_chip_position : position)
+        chip.move(from_dealer ? @chip_stack_winnings.add_position : position)
         player.add_chip(chip)
       end
     end

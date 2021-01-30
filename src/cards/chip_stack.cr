@@ -79,7 +79,7 @@ module Cards
       @chips.pop
     end
 
-    def add_chip_position
+    def add_position
       Game::Vector.new(
         x: x,
         y: y - @chips.size * Chip.height_depth

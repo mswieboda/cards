@@ -108,6 +108,10 @@ module Cards
       hands.all?(&.dealt?)
     end
 
+    def splitting?
+      false
+    end
+
     def playing?
       hands.any?(&.playing?)
     end

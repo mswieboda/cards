@@ -53,6 +53,10 @@ module Cards
             chip_stack = doubling_bet? ? hand.chip_stack_bet_double : hand.chip_stack_bet
             chip_stack.add(chip)
           end
+        elsif splitting?
+          if split_hand = @hands[@split_hand_index]
+            split_hand.chip_stack_bet.add(chip)
+          end
         else
           @chip_tray.add(chip)
         end
@@ -61,7 +65,12 @@ module Cards
 
     def playing_update(_frame_time)
       move_chips
-      double_bet if doubling_bet?
+
+      if doubling_bet?
+        double_bet
+      elsif splitting?
+        split_hand
+      end
     end
 
     def betting_update(frame_time)
@@ -151,7 +160,7 @@ module Cards
         @placing_bet = true
 
         chip_stack = doubling_bet? ? hand.chip_stack_bet_double : hand.chip_stack_bet
-        chip.move(chip_stack.add_chip_position)
+        chip.move(chip_stack.add_position)
 
         @chips << chip
       end
@@ -199,15 +208,19 @@ module Cards
           if placing_bet?
             @placing_bet = false
             delay(deal_delay)
-          elsif !hand.hitting?
+          elsif !splitting? && !hand.hitting?
             hand.hitting = true
           else
             @doubling_bet = false
             hand_check
 
             if hand = current_hand
-              hand.play_done if hand.playing?
-              delay(done_delay)
+              if splitting?
+                delay(action_delay)
+              else
+                hand.play_done
+                delay(done_delay)
+              end
             end
           end
         end
@@ -223,7 +236,7 @@ module Cards
     end
 
     def split
-      log(:double_down)
+      log(:split)
       @doubling_bet = true
       @splitting = true
       @hands << Hand.new
@@ -234,6 +247,36 @@ module Cards
       end
 
       update_positions
+    end
+
+    def split_hand
+      if split_hand = @hands[@split_hand_index]
+        if hand = current_hand
+          if hand.chip_stack_bet_double.any?
+            chip = hand.chip_stack_bet_double.take
+            chip.move(split_hand.chip_stack_bet.add_position)
+            @chips << chip
+          end
+
+          if split_hand.empty? && hand.size == 2
+            if card = hand.take
+              card.move(split_hand.add_card_position)
+              split_hand.cards << card
+            end
+          end
+
+          if hand.cards.all?(&.moved?) && split_hand.cards.all?(&.moved?) && @chips.empty?
+            if hand.size == 1 && split_hand.size == 1
+              split_hand.confirmed_bet = true
+            elsif hand.size >= 2 && split_hand.size >= 2
+              @splitting = false
+              @split_hand_index = 0
+              split_hand.playing = true
+              delay(deal_delay)
+            end
+          end
+        end
+      end
     end
 
     def confirmed_bet?
@@ -249,6 +292,38 @@ module Cards
           # message to decrease bet, or buy in to increase balance
           log(:confirm_bet, "not enough chips, balance: #{balance} bet: #{hand.bet}")
         end
+      end
+    end
+
+    def hitting=(value : Bool)
+      if hand = current_hand
+        hand.hitting = value
+
+        if splitting?
+          if split_hand = @hands[@split_hand_index]
+            split_hand.hitting = value
+          end
+        end
+      end
+    end
+
+    def deal(card_stack : CardStack)
+      log(:deal)
+
+      if hand = current_hand
+        hand.deal(card_stack)
+
+        if splitting?
+          if split_hand = @hands[@split_hand_index]
+            split_hand.deal(card_stack)
+          end
+
+          hand_check
+        else
+          next_hand if hand.size <= 1
+        end
+
+        delay(deal_delay)
       end
     end
 

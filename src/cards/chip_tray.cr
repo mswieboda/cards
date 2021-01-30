@@ -83,7 +83,7 @@ module Cards
 
     def add_position(chip : Chip)
       if chip_stack = @chip_stacks[chip.amount]
-        chip_stack.add_chip_position
+        chip_stack.add_position
       end
     end
 

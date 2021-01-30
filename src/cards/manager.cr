@@ -246,7 +246,7 @@ module Cards
     def deal(player : CardPlayer)
       player.deal(@deck_stack) unless player.dealt?
 
-      next_turn
+      next_turn unless player.splitting?
     end
   end
 end
