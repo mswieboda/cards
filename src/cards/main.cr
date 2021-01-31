@@ -18,8 +18,16 @@ module Cards
 
       load_sprites
 
-      @menu = MainMenu.new
+      @menu = MainMenu.new(%w(blackjack solitare options exit))
       @game = Blackjack::GameMode.new
+
+      @menu.on("blackjack") do
+        @game = Blackjack::GameMode.new
+      end
+
+      @menu.on("solitare") do
+        @game = Solitare::GameMode.new
+      end
 
       @menu.show
     end

@@ -1,6 +1,7 @@
 module Cards
   abstract class Menu
     getter? shown
+    getter? exit
     property? done
 
     @items : Array(MenuItem)

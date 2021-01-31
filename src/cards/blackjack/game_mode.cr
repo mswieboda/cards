@@ -1,5 +1,3 @@
-# require "../game_mode"
-
 module Cards
   module Blackjack
     class GameMode < Cards::GameMode

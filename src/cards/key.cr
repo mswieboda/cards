@@ -4,7 +4,7 @@ module Cards
     end
 
     def self.up_keys
-      [Game::Key::Down, Game::Key::S]
+      [Game::Key::Up, Game::Key::W]
     end
 
     def self.down_keys

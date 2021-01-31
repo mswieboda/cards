@@ -2,18 +2,20 @@ require "./menu"
 
 module Cards
   class MainMenu < Menu
-    getter? exit
-
-    def initialize
-      super(%w(blackjack options exit))
+    def initialize(items = [] of String)
+      super(items)
+      @handlers = Hash(String, Proc(Nil)).new
     end
 
     def select_item
       item = @items[@focus_index]
 
-      if item.text == "blackjack"
+      if callback = @handlers[item.text]?
         @done = true
-      elsif item.text == "exit"
+        callback.call
+      end
+
+      if item.text == "exit"
         @exit = true
       end
     end
@@ -27,6 +29,10 @@ module Cards
 
       draw_header("cards")
       super
+    end
+
+    def on(item, &block : Proc(Nil))
+      @handlers[item] = block
     end
   end
 end
