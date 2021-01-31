@@ -19,7 +19,7 @@ module Cards
       load_sprites
 
       @menu = MainMenu.new
-      @game = Blackjack.new
+      @game = Blackjack::GameMode.new
 
       @menu.show
     end
