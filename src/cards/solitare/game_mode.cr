@@ -7,6 +7,7 @@ module Cards
       FAN_STACKS = 7
       DEAL_CARDS = (FAN_STACKS + 1).times.to_a.sum
 
+      @stock : Stock
       @fan_stacks : Array(FanStack)
       @cards : Array(Card)
 
@@ -18,16 +19,21 @@ module Cards
         @dealt = false
 
         deck = StandardDeck.new(jokers: false)
-        @stack = CardStack.new(
+        @stock = Stock.new(
           x: MARGIN,
           y: MARGIN,
           cards: deck.cards.clone
         )
 
+        @waste = Waste.new(
+          x: @stock.x + Card.width + MARGIN * 2,
+          y: MARGIN
+        )
+
         @fan_stacks = FAN_STACKS.times.to_a.map do |index|
           FanStack.new(
-            x: @stack.x + index * (MARGIN * 2 + Card.width),
-            y: @stack.y + Card.height + MARGIN * 2
+            x: @stock.x + index * (MARGIN * 2 + Card.width),
+            y: @stock.y + Card.height + MARGIN * 2
           )
         end
 
@@ -41,11 +47,27 @@ module Cards
           deal
           return
         end
+
+        @stock.update(frame_time)
+        @waste.update(frame_time)
+
+        @cards.select(&.moved?).each do |card|
+          @cards.delete(card)
+          @waste.add(card)
+          card.flip if card.flipped?
+        end
+
+        if @stock.pressed?
+          card = @stock.take
+          card.move(@waste.add_position)
+          @cards << card
+        end
       end
 
       def draw
         super
-        @stack.draw
+        @stock.draw
+        @waste.draw
         @fan_stacks.each(&.draw)
         @cards.each(&.draw)
       end
@@ -76,7 +98,7 @@ module Cards
           return
         end
 
-        card = @stack.take
+        card = @stock.take
         card.move(@fan_stacks[deal_fan_stack_index].add_position)
         @cards << card
       end

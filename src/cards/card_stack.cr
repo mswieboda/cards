@@ -23,6 +23,26 @@ module Cards
       @cards.each(&.draw(screen_x, screen_y))
     end
 
+    def self.width
+      Card.width
+    end
+
+    def self.height
+      Card.height
+    end
+
+    def width
+      self.class.width
+    end
+
+    def height
+      self.class.height + height_depth
+    end
+
+    def height_depth
+      @cards.size * Card.height_depth
+    end
+
     def add_position
       Game::Vector.new(
         x: x,

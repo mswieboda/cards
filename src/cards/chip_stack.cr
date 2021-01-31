@@ -47,12 +47,20 @@ module Cards
       self.class.width
     end
 
-    def top_y
-      y - height
+    def self.height
+      Chip.height
     end
 
     def height
+      self.class.height + height_depth
+    end
+
+    def height_depth
       @chips.size * Chip.height_depth
+    end
+
+    def top_y
+      y - height
     end
 
     def init_chip_frames
@@ -106,9 +114,9 @@ module Cards
         if @chips.any?
           @hovered = Game::Mouse.in?(
             x: x,
-            y: y - height,
+            y: y - height_depth,
             width: width,
-            height: height + Chip.height
+            height: height
           )
         else
           @hovered = Game::Mouse.in?(
