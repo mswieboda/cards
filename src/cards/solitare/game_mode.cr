@@ -32,7 +32,6 @@ module Cards
         end
 
         @cards = [] of Card
-
       end
 
       def update(frame_time)
@@ -59,9 +58,12 @@ module Cards
       def deal
         @cards.select(&.moved?).each do |card|
           fan_stack_index = deal_fan_stack_index
+          fan_stack = @fan_stacks[fan_stack_index]
 
-          @fan_stacks[fan_stack_index].add(card)
+          fan_stack.add(card)
           @cards.delete(card)
+
+          card.flip if fan_stack.size >= fan_stack_index + 1
 
           @deal_row_index += 1 if fan_stack_index >= @fan_stacks.size - 1
           @deal_index += 1
