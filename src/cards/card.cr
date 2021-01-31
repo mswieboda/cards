@@ -135,9 +135,9 @@ module Cards
     def draw_shadow(screen_x, screen_y)
       Game::RoundedRectangle.new(
         x: screen_x + x + DROP_SHADOW,
-        y: screen_y + y + DROP_SHADOW,
+        y: screen_y + y - DROP_SHADOW,
         width: width,
-        height: height,
+        height: height + DROP_SHADOW * 2,
         roundness: 0.15_f32,
         color: Game::Color::Black.alpha(33_u8),
       ).draw
