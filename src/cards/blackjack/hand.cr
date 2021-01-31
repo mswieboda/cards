@@ -190,7 +190,7 @@ module Cards
         @cards.pop
       end
 
-      def add_card_position
+      def add_position
         x = @x - Card.margin / 2_f32 - Card.width + [cards.size, 1].min * (Card.width + Card.margin)
         x += 2 * Card.margin * (cards.size - 1) if cards.size >= 2
 
@@ -207,7 +207,7 @@ module Cards
 
         card.flip if flip && card.flipped?
 
-        card.move(add_card_position)
+        card.move(add_position)
         @cards << card
         card
       end
@@ -402,7 +402,7 @@ module Cards
         unless cards.empty?
           if @clearing_card_index >= 0
             card = cards[@clearing_card_index]
-            card.move(discard_stack.add_card_position)
+            card.move(discard_stack.add_position)
 
             # clear cards
             cards[@clearing_card_index..-1].select(&.moved?).each do |card|

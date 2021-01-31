@@ -23,7 +23,7 @@ module Cards
       @cards.each(&.draw(screen_x, screen_y))
     end
 
-    def add_card_position
+    def add_position
       Game::Vector.new(
         x: x,
         y: y - @cards.size * Card.height_depth

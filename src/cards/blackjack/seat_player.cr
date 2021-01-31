@@ -276,7 +276,7 @@ module Cards
 
             if split_hand.empty? && hand.size == 2
               if card = hand.take
-                card.move(split_hand.add_card_position)
+                card.move(split_hand.add_position)
                 split_hand.cards << card
               end
             end

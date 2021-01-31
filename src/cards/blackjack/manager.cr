@@ -197,7 +197,7 @@ module Cards
         return if from.empty?
 
         if card = from.take_sample
-          card.move(to.add_card_position, frames)
+          card.move(to.add_position, frames)
           @cards << card
         end
       end
