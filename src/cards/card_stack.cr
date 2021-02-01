@@ -85,6 +85,10 @@ module Cards
       Card.height
     end
 
+    def self.height_depth
+      Card.height_depth
+    end
+
     def width
       self.class.width
     end
@@ -94,13 +98,13 @@ module Cards
     end
 
     def height_depth
-      @cards.size * Card.height_depth
+      @cards.size * self.class.height_depth
     end
 
     def add_position
       Game::Vector.new(
         x: x,
-        y: y - @cards.size * Card.height_depth
+        y: y - @cards.size * self.class.height_depth
       )
     end
 
@@ -119,8 +123,21 @@ module Cards
     def update_cards_position
       @cards.each_with_index do |card, index|
         card.position.x = x
-        card.position.y = y - index * Card.height_depth
+        card.position.y = y - index * self.class.height_depth
       end
+    end
+
+    def mouse_in?
+      Game::Mouse.in?(
+        x: x,
+        y: y - height_depth,
+        width: width,
+        height: height
+      )
+    end
+
+    def pressed?
+      mouse_in? && Game::Mouse::Left.pressed?
     end
 
     def take : Card
@@ -131,6 +148,21 @@ module Cards
       card = @cards.delete(@cards.sample)
       update_cards_position
       card
+    end
+
+    def take_pressed
+      return unless pressed?
+      return if empty?
+      take
+    end
+
+    def take_pressed_stack
+      return unless pressed?
+      return if empty?
+
+      index = @cards.index(&.mouse_in?)
+
+      self.class.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
     end
 
     def shuffle!

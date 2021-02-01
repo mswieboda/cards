@@ -18,6 +18,19 @@ module Cards
           y: y
         )
       end
+
+      def mouse_in?
+        any? && cards.last.mouse_in?
+      end
+
+      def take_pressed_stack
+        return unless pressed?
+        return if empty?
+
+        card = take
+
+        self.class.new(x: card.x, y: card.y, cards: [card])
+      end
     end
   end
 end

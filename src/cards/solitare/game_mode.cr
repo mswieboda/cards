@@ -7,7 +7,7 @@ module Cards
       FAN_STACKS = 7
       DEAL_CARDS = (FAN_STACKS + 1).times.to_a.sum
 
-      @stock : Stock
+      @stock : CardStack
       @stacks : Array(Stack)
       @cards : Array(Card)
       @stack_drag : Stack?
@@ -23,7 +23,7 @@ module Cards
         @dealt = false
 
         deck = StandardDeck.new(jokers: false)
-        @stock = Stock.new(
+        @stock = CardStack.new(
           x: MARGIN,
           y: MARGIN,
           cards: deck.cards.clone
@@ -65,14 +65,12 @@ module Cards
           card.flip if card.flipped?
         end
 
-        if @stock.pressed?
-          card = @stock.take
+        if card = @stock.take_pressed
           card.move(@waste.add_position)
           @cards << card
-        elsif @waste.pressed?
-          card = @waste.take
-          @stack_drag_delta = @waste.pressed_delta
-          @stack_drag = Stack.new(x: card.x, y: card.y, cards: [card])
+        elsif stack = @waste.take_pressed_stack
+          @stack_drag = stack
+          @stack_drag_delta = Game::Mouse.position - stack.position
         end
 
         if stack = @stack_drag
