@@ -8,12 +8,12 @@ module Cards
       DEAL_CARDS = (FAN_STACKS + 1).times.to_a.sum
 
       @stock : Stock
-      @fan_stacks : Array(FanStack)
+      @stacks : Array(Stack)
       @cards : Array(Card)
-      @card_drag : Card?
-      @card_drag_delta : Game::Vector
-      @card_drag_to_stack : CardStack
-      @card_drag_released : Bool
+      @stack_drag : Stack?
+      @stack_drag_delta : Game::Vector
+      @stack_drag_to_stack : CardStack
+      @stack_drag_released : Bool
 
       def initialize
         super
@@ -34,18 +34,18 @@ module Cards
           y: MARGIN
         )
 
-        @fan_stacks = FAN_STACKS.times.to_a.map do |index|
-          FanStack.new(
+        @stacks = FAN_STACKS.times.to_a.map do |index|
+          Stack.new(
             x: @stock.x + index * (MARGIN * 2 + Card.width),
             y: @stock.y + Card.height + MARGIN * 2
           )
         end
 
         @cards = [] of Card
-        @card_drag = nil
-        @card_drag_delta = Game::Vector.zero
-        @card_drag_to_stack = @waste
-        @card_drag_released = false
+        @stack_drag = nil
+        @stack_drag_delta = Game::Vector.zero
+        @stack_drag_to_stack = @waste
+        @stack_drag_released = false
       end
 
       def update(frame_time)
@@ -70,33 +70,34 @@ module Cards
           card.move(@waste.add_position)
           @cards << card
         elsif @waste.pressed?
-          @card_drag_delta = @waste.pressed_delta
-          @card_drag = @waste.take
+          card = @waste.take
+          @stack_drag_delta = @waste.pressed_delta
+          @stack_drag = Stack.new(x: card.x, y: card.y, cards: [card])
         end
 
-        if card = @card_drag
-          card.update(frame_time)
+        if stack = @stack_drag
+          stack.update(frame_time)
 
-          if @card_drag_released
-            if card.moved?
-              @card_drag_to_stack.add(card)
-              @card_drag = nil
-              @card_drag_delta = Game::Vector.zero
-              @card_drag_released = false
+          if @stack_drag_released
+            if stack.moved?
+              @stack_drag_to_stack.add(stack)
+              @stack_drag = nil
+              @stack_drag_delta = Game::Vector.zero
+              @stack_drag_released = false
             end
           else
-            card.x = Game::Mouse.x - @card_drag_delta.x
-            card.y = Game::Mouse.y - @card_drag_delta.y
+            stack.x = Game::Mouse.x - @stack_drag_delta.x
+            stack.y = Game::Mouse.y - @stack_drag_delta.y
 
             unless Game::Mouse::Left.down?
-              @card_drag_to_stack = @waste
+              @stack_drag_to_stack = @waste
 
-              if fan_stack = @fan_stacks.find(&.mouse_in?)
-                @card_drag_to_stack = fan_stack
+              if to_stack = @stacks.find(&.mouse_in?)
+                @stack_drag_to_stack = to_stack
               end
 
-              card.move(@card_drag_to_stack.add_position)
-              @card_drag_released = true
+              stack.move(@stack_drag_to_stack.add_position)
+              @stack_drag_released = true
             end
           end
         end
@@ -106,30 +107,30 @@ module Cards
         super
         @stock.draw
         @waste.draw
-        @fan_stacks.each(&.draw)
+        @stacks.each(&.draw)
         @cards.each(&.draw)
 
-        if card = @card_drag
-          card.draw
+        if stack = @stack_drag
+          stack.draw
         end
       end
 
-      def deal_fan_stack_index(prev_row = false)
+      def deal_stack_index(prev_row = false)
         spaces = (@deal_row_index + 1).times.to_a.sum
-        (@deal_index + spaces) % @fan_stacks.size
+        (@deal_index + spaces) % @stacks.size
       end
 
       def deal
         @cards.select(&.moved?).each do |card|
-          fan_stack_index = deal_fan_stack_index
-          fan_stack = @fan_stacks[fan_stack_index]
+          stack_index = deal_stack_index
+          stack = @stacks[stack_index]
 
-          fan_stack.add(card)
+          stack.add(card)
           @cards.delete(card)
 
-          card.flip if fan_stack.size >= fan_stack_index + 1
+          card.flip if stack.size >= stack_index + 1
 
-          @deal_row_index += 1 if fan_stack_index >= @fan_stacks.size - 1
+          @deal_row_index += 1 if stack_index >= @stacks.size - 1
           @deal_index += 1
         end
 
@@ -141,7 +142,7 @@ module Cards
         end
 
         card = @stock.take
-        card.move(@fan_stacks[deal_fan_stack_index].add_position)
+        card.move(@stacks[deal_stack_index].add_position)
         @cards << card
       end
     end

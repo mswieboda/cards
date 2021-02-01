@@ -96,7 +96,7 @@ module Cards
 
     def move(move_to : Game::Vector, frames = MOVEMENT_FRAMES)
       @move_to = move_to.clone
-      @move_delta = move_to.subtract(position) / frames
+      @move_delta = (move_to - position) / frames
     end
 
     def update(frame_time)

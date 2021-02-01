@@ -1,6 +1,6 @@
 module Cards
   module Solitare
-    class FanStack < CardStack
+    class Stack < CardStack
       PEEK = 25
 
       def update_cards_position
