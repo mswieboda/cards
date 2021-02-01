@@ -25,9 +25,7 @@ module Cards
           @hovered = card.mouse_in?
 
           if hovered? && Game::Mouse::Left.pressed?
-            # TODO: switch to Game::Mouse.position when added/published
-            # TODO: switch to Vector#-(vector : Vector) when added/published (via macros)
-            @pressed_delta = Game::Vector.new(x: Game::Mouse.x, y: Game::Mouse.y).subtract(card.position)
+            @pressed_delta = Game::Mouse.position - card.position
           end
         end
       end
