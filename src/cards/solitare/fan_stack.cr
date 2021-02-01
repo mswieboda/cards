@@ -1,7 +1,7 @@
 module Cards
   module Solitare
     class FanStack < CardStack
-      PEEK = 30
+      PEEK = 25
 
       def update_cards_position
         @cards.each_with_index do |card, index|
@@ -15,6 +15,19 @@ module Cards
           x: x,
           y: y + @cards.size * (Card.height_depth + PEEK)
         )
+      end
+
+      def mouse_in?
+        if any?
+          cards.last.mouse_in?
+        else
+          Game::Mouse.in?(
+            x: x,
+            y: y,
+            width: Card.width,
+            height: Card.height
+          )
+        end
       end
     end
   end

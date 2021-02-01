@@ -26,7 +26,7 @@ module Cards
       def draw(screen_x = 0, screen_y = 0)
         super
 
-        if hovered?
+        if Main::DEBUG && hovered?
           Game::RoundedRectangle.new(
             x: screen_x + x,
             y: screen_y + y - height_depth,

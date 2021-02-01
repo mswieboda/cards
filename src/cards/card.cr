@@ -77,6 +77,15 @@ module Cards
       rank.joker? ? rank.short_name : rank.short_name + suit.short_name
     end
 
+    def mouse_in?
+      Game::Mouse.in?(
+        x: x,
+        y: y,
+        width: width,
+        height: height
+      )
+    end
+
     def moving?
       !!@move_to
     end

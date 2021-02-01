@@ -22,12 +22,7 @@ module Cards
         if @cards.any?
           card = @cards.last
 
-          @hovered = Game::Mouse.in?(
-            x: card.x,
-            y: card.y,
-            width: card.width,
-            height: card.height
-          )
+          @hovered = card.mouse_in?
 
           if hovered? && Game::Mouse::Left.pressed?
             # TODO: switch to Game::Mouse.position when added/published
@@ -40,7 +35,7 @@ module Cards
       def draw(screen_x = 0, screen_y = 0)
         super
 
-        if hovered?
+        if Main::DEBUG && @cards.any? && hovered?
           card = @cards.last
           Game::RoundedRectangle.new(
             x: screen_x + card.x,

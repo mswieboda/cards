@@ -408,6 +408,7 @@ module Cards
             cards[@clearing_card_index..-1].select(&.moved?).each do |card|
               cards.delete(card)
               discard_stack.add(card)
+              card.flip unless card.flipped?
             end
 
             @clearing_card_index -= 1
@@ -416,6 +417,7 @@ module Cards
             cards.select(&.moved?).each_with_index do |card|
               cards.delete(card)
               discard_stack.add(card)
+              card.flip unless card.flipped?
             end
           end
         end

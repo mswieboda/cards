@@ -50,9 +50,7 @@ module Cards
       )
     end
 
-    def add(card : Card, flipped = true)
-      card.flip if flipped && !card.flipped?
-
+    def add(card : Card)
       @cards << card
 
       update_cards_position

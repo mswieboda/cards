@@ -12,6 +12,8 @@ module Cards
       @cards : Array(Card)
       @card_drag : Card?
       @card_drag_delta : Game::Vector
+      @card_drag_to_stack : CardStack
+      @card_drag_released : Bool
 
       def initialize
         super
@@ -42,6 +44,8 @@ module Cards
         @cards = [] of Card
         @card_drag = nil
         @card_drag_delta = Game::Vector.zero
+        @card_drag_to_stack = @waste
+        @card_drag_released = false
       end
 
       def update(frame_time)
@@ -71,14 +75,29 @@ module Cards
         end
 
         if card = @card_drag
-          # TODO: save the diff from press, and use it here when mouse moves
-          card.x = Game::Mouse.x - @card_drag_delta.x
-          card.y = Game::Mouse.y - @card_drag_delta.y
+          card.update(frame_time)
 
-          unless Game::Mouse::Left.down?
-            card.move(@waste.add_position)
-            @cards << card
-            @card_drag = nil
+          if @card_drag_released
+            if card.moved?
+              @card_drag_to_stack.add(card)
+              @card_drag = nil
+              @card_drag_delta = Game::Vector.zero
+              @card_drag_released = false
+            end
+          else
+            card.x = Game::Mouse.x - @card_drag_delta.x
+            card.y = Game::Mouse.y - @card_drag_delta.y
+
+            unless Game::Mouse::Left.down?
+              @card_drag_to_stack = @waste
+
+              if fan_stack = @fan_stacks.find(&.mouse_in?)
+                @card_drag_to_stack = fan_stack
+              end
+
+              card.move(@card_drag_to_stack.add_position)
+              @card_drag_released = true
+            end
           end
         end
       end
