@@ -10,6 +10,8 @@ module Cards
       @stock : Stock
       @fan_stacks : Array(FanStack)
       @cards : Array(Card)
+      @card_drag : Card?
+      @card_drag_delta : Game::Vector
 
       def initialize
         super
@@ -38,6 +40,8 @@ module Cards
         end
 
         @cards = [] of Card
+        @card_drag = nil
+        @card_drag_delta = Game::Vector.zero
       end
 
       def update(frame_time)
@@ -61,6 +65,21 @@ module Cards
           card = @stock.take
           card.move(@waste.add_position)
           @cards << card
+        elsif @waste.pressed?
+          @card_drag_delta = @waste.pressed_delta
+          @card_drag = @waste.take
+        end
+
+        if card = @card_drag
+          # TODO: save the diff from press, and use it here when mouse moves
+          card.x = Game::Mouse.x - @card_drag_delta.x
+          card.y = Game::Mouse.y - @card_drag_delta.y
+
+          unless Game::Mouse::Left.down?
+            card.move(@waste.add_position)
+            @cards << card
+            @card_drag = nil
+          end
         end
       end
 
@@ -70,6 +89,10 @@ module Cards
         @waste.draw
         @fan_stacks.each(&.draw)
         @cards.each(&.draw)
+
+        if card = @card_drag
+          card.draw
+        end
       end
 
       def deal_fan_stack_index(prev_row = false)
