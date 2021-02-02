@@ -138,6 +138,16 @@ module Cards
               @stack_drag_released = true
             end
           end
+
+          # check for move to foundation
+          # TODO: switch to left mouse double click, or left & right click
+          if Game::Mouse::Left.down? && Game::Key::Space.pressed?
+            if foundation = @foundations.find(&.drop?(stack: stack, auto: true))
+              @stack_drag_to_stack = foundation
+              @stack_drag_released = true
+              stack.move(@stack_drag_to_stack.add_position)
+            end
+          end
         end
       end
 
