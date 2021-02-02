@@ -59,6 +59,16 @@ module Cards
 
         self.class.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
       end
+
+      def drop?(stack : Stack)
+        return false if stack.empty? || !mouse_in?
+        return true if empty?
+
+        top = @cards.last
+        bottom = stack.cards.first
+
+        top.rank.value == bottom.rank.value + 1 && !top.suit.pair?(bottom.suit)
+      end
     end
   end
 end

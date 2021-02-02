@@ -60,7 +60,7 @@ module Cards
         @waste.update(frame_time)
 
         move_cards_to_waste
-        drag_stack
+        drag_stack(frame_time)
       end
 
       def draw
@@ -89,7 +89,7 @@ module Cards
         end
       end
 
-      def drag_stack
+      def drag_stack(frame_time)
         # check for drag stack from waste or stacks
         ([@waste] + @stacks).each do |stack|
           if stack_drag = stack.take_pressed_stack
@@ -119,7 +119,7 @@ module Cards
 
             # release stack
             unless Game::Mouse::Left.down?
-              if to_stack = @stacks.find(&.mouse_in?)
+              if to_stack = @stacks.find(&.drop?(stack))
                 @stack_drag_to_stack = to_stack
               end
 

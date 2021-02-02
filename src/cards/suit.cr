@@ -37,5 +37,14 @@ module Cards
         Game::Color::Black
       end
     end
+
+    def pair?(suit : Suit)
+      case self
+      when .in?(Diamonds, Hearts)
+        suit.in?(Diamonds, Hearts)
+      else
+        suit.in?(Clubs, Spades)
+      end
+    end
   end
 end
