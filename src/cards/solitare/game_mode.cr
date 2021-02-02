@@ -2,6 +2,7 @@ module Cards
   module Solitare
     class GameMode < Cards::GameMode
       getter? dealt
+      getter? clearing_waste
 
       MARGIN = 25
       FAN_STACKS = 7
@@ -23,6 +24,7 @@ module Cards
         @deal_index = 0
         @deal_row_index = 0
         @dealt = false
+        @clearing_waste = false
 
         deck = StandardDeck.new(jokers: false)
         @stock = CardStack.new(
@@ -61,17 +63,11 @@ module Cards
       def update(frame_time)
         @cards.each(&.update(frame_time))
 
-        if !dealt?
-          deal
-          return
-        end
-
-        @stock.update(frame_time)
-        @waste.update(frame_time)
-
-        move_cards_to_waste
-        flip_up_stack_top_card
-        drag_stack(frame_time)
+        return if !dealt? && deal
+        return if clear_waste
+        return if move_cards_to_waste
+        return if flip_up_stack_top_card
+        return if drag_stack(frame_time)
       end
 
       def draw
@@ -98,12 +94,14 @@ module Cards
           # move from stock to waste
           card.move(@waste.add_position)
           @cards << card
+          return true
         end
       end
 
       def flip_up_stack_top_card
         if stack = @stacks.find(&.flip_up_top_card?)
           stack.flip_up_top_card
+          return true
         end
       end
 
@@ -114,7 +112,7 @@ module Cards
             @stack_drag = stack_drag
             @stack_drag_delta = Game::Mouse.position - stack_drag.position
             @stack_drag_to_stack = stack
-            break
+            return true
           end
         end
 
@@ -153,8 +151,31 @@ module Cards
               @stack_drag_to_stack = foundation
               @stack_drag_released = true
               stack.move(@stack_drag_to_stack.add_position)
+              return true
             end
           end
+        end
+      end
+
+      def clear_waste
+        if @stock.empty? && @stock.pressed?
+          @clearing_waste = true
+        end
+
+        return unless clearing_waste?
+
+        @cards.select(&.moved?).each do |card|
+          @cards.delete(card)
+          @stock.add(card)
+        end
+
+        if @waste.empty?
+          @clearing_waste = false if @cards.empty?
+        else
+          card = @waste.take
+          card.move(@stock.add_position)
+          card.flip unless card.flipped?
+          @cards << card
         end
       end
 
@@ -177,11 +198,11 @@ module Cards
           @deal_index += 1
         end
 
-        return if @cards.any?(&.moving?)
+        return true if @cards.any?(&.moving?)
 
         if @deal_index >= DEAL_CARDS
           @dealt = true
-          return
+          return true
         end
 
         card = @stock.take
