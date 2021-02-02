@@ -59,46 +59,8 @@ module Cards
         @stock.update(frame_time)
         @waste.update(frame_time)
 
-        @cards.select(&.moved?).each do |card|
-          @cards.delete(card)
-          @waste.add(card)
-          card.flip if card.flipped?
-        end
-
-        if card = @stock.take_pressed
-          card.move(@waste.add_position)
-          @cards << card
-        elsif stack = @waste.take_pressed_stack
-          @stack_drag = stack
-          @stack_drag_delta = Game::Mouse.position - stack.position
-        end
-
-        if stack = @stack_drag
-          stack.update(frame_time)
-
-          if @stack_drag_released
-            if stack.moved?
-              @stack_drag_to_stack.add(stack)
-              @stack_drag = nil
-              @stack_drag_delta = Game::Vector.zero
-              @stack_drag_released = false
-            end
-          else
-            stack.x = Game::Mouse.x - @stack_drag_delta.x
-            stack.y = Game::Mouse.y - @stack_drag_delta.y
-
-            unless Game::Mouse::Left.down?
-              @stack_drag_to_stack = @waste
-
-              if to_stack = @stacks.find(&.mouse_in?)
-                @stack_drag_to_stack = to_stack
-              end
-
-              stack.move(@stack_drag_to_stack.add_position)
-              @stack_drag_released = true
-            end
-          end
-        end
+        move_cards_to_waste
+        drag_stack
       end
 
       def draw
@@ -110,6 +72,61 @@ module Cards
 
         if stack = @stack_drag
           stack.draw
+        end
+      end
+
+      def move_cards_to_waste
+        @cards.select(&.moved?).each do |card|
+          @cards.delete(card)
+          @waste.add(card)
+          card.flip if card.flipped?
+        end
+
+        if card = @stock.take_pressed
+          # move from stock to waste
+          card.move(@waste.add_position)
+          @cards << card
+        end
+      end
+
+      def drag_stack
+        # check for drag stack from waste or stacks
+        ([@waste] + @stacks).each do |stack|
+          if stack_drag = stack.take_pressed_stack
+            @stack_drag = stack_drag
+            @stack_drag_delta = Game::Mouse.position - stack_drag.position
+            @stack_drag_to_stack = stack
+            break
+          end
+        end
+
+        # if we're dragging a stack
+        if stack = @stack_drag
+          stack.update(frame_time)
+
+          if @stack_drag_released
+            if stack.moved?
+              # add to target stack
+              @stack_drag_to_stack.add(stack)
+              @stack_drag = nil
+              @stack_drag_delta = Game::Vector.zero
+              @stack_drag_released = false
+            end
+          else
+            # move stack with mouse
+            stack.x = Game::Mouse.x - @stack_drag_delta.x
+            stack.y = Game::Mouse.y - @stack_drag_delta.y
+
+            # release stack
+            unless Game::Mouse::Left.down?
+              if to_stack = @stacks.find(&.mouse_in?)
+                @stack_drag_to_stack = to_stack
+              end
+
+              stack.move(@stack_drag_to_stack.add_position)
+              @stack_drag_released = true
+            end
+          end
         end
       end
 

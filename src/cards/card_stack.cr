@@ -156,15 +156,6 @@ module Cards
       take
     end
 
-    def take_pressed_stack
-      return unless pressed?
-      return if empty?
-
-      index = @cards.index(&.mouse_in?)
-
-      self.class.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
-    end
-
     def shuffle!
       @cards.shuffle!
       update_cards_position

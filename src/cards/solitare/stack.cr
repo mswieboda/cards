@@ -45,6 +45,20 @@ module Cards
           y: y + @cards.size * (self.class.height_depth + margin_y)
         )
       end
+
+      def take_pressed_stack
+        return unless pressed?
+        return if empty?
+
+        index = @cards.reverse.index(&.mouse_in?)
+
+        return unless index
+
+        index = @cards.size - 1 - index
+        card = @cards[index]
+
+        self.class.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
+      end
     end
   end
 end
