@@ -48,10 +48,10 @@ module Cards
         MARGIN_Y
       end
 
-      def add_position
+      def add_position(index = @cards.size - 1)
         Game::Vector.new(
           x: x,
-          y: y - @cards.size * self.class.height_depth
+          y: y - (index + 1) * self.class.height_depth
         )
       end
 

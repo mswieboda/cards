@@ -64,7 +64,7 @@ module Cards
         @cards.each(&.update(frame_time))
 
         return if !dealt? && deal
-        return if clear_waste
+        return if clear_waste(frame_time)
         return if move_cards_to_waste
         return if flip_up_stack_top_card
         return if drag_stack(frame_time)
@@ -157,26 +157,31 @@ module Cards
         end
       end
 
-      def clear_waste
+      def clear_waste(frame_time)
         if @stock.empty? && @stock.pressed?
           @clearing_waste = true
+
+          @waste.cards.each_with_index do |card, index|
+            card.move(@stock.add_position(index))
+          end
+
+          return true
         end
 
         return unless clearing_waste?
 
-        @cards.select(&.moved?).each do |card|
-          @cards.delete(card)
-          @stock.add(card)
+        @waste.update(frame_time)
+
+        if @waste.cards.all?(&.moved?)
+          @waste.flip!
+
+          @stock.add(@waste)
+          @stock.update_cards_position
+
+          @clearing_waste = false
         end
 
-        if @waste.empty?
-          @clearing_waste = false if @cards.empty?
-        else
-          card = @waste.take
-          card.move(@stock.add_position)
-          card.flip unless card.flipped?
-          @cards << card
-        end
+        true
       end
 
       def deal_stack_index(prev_row = false)

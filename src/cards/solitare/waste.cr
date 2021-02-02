@@ -14,9 +14,9 @@ module Cards
         MARGIN_Y
       end
 
-      def add_position
+      def add_position(index = @cards.size - 1)
         Game::Vector.new(
-          x: x + @cards.size * margin_x,
+          x: x + (index + 1) * margin_x,
           y: y
         )
       end

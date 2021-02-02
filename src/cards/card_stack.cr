@@ -101,10 +101,10 @@ module Cards
       @cards.size * self.class.height_depth
     end
 
-    def add_position
+    def add_position(index = @cards.size - 1)
       Game::Vector.new(
         x: x,
-        y: y - @cards.size * self.class.height_depth
+        y: y - (index + 1) * self.class.height_depth
       )
     end
 
@@ -116,7 +116,7 @@ module Cards
 
     def add(card_stack : CardStack)
       @cards += card_stack.cards
-      card_stack.cards = [] of Card
+      card_stack.cards.clear
       @cards
     end
 
@@ -154,6 +154,11 @@ module Cards
       return unless pressed?
       return if empty?
       take
+    end
+
+    def flip!
+      @cards.reverse!
+      @cards.each(&.flip)
     end
 
     def shuffle!
