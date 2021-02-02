@@ -8,7 +8,9 @@ module Cards
       DEAL_CARDS = (FAN_STACKS + 1).times.to_a.sum
 
       @stock : CardStack
+      @waste : Waste
       @stacks : Array(Stack)
+      @foundations : Array(Foundation)
       @cards : Array(Card)
       @stack_drag : Stack?
       @stack_drag_delta : Game::Vector
@@ -41,6 +43,14 @@ module Cards
           )
         end
 
+        @foundations = Suit.values.map_with_index do |suit, index|
+          Foundation.new(
+            suit: suit,
+            x: Main.screen_width - MARGIN - Card.width - index * (MARGIN * 2 + Card.width),
+            y: MARGIN
+          )
+        end
+
         @cards = [] of Card
         @stack_drag = nil
         @stack_drag_delta = Game::Vector.zero
@@ -67,6 +77,7 @@ module Cards
         super
         @stock.draw
         @waste.draw
+        @foundations.each(&.draw)
         @stacks.each(&.draw)
         @cards.each(&.draw)
 
@@ -91,7 +102,7 @@ module Cards
 
       def drag_stack(frame_time)
         # check for drag stack from waste or stacks
-        ([@waste] + @stacks).each do |stack|
+        ([@waste] + @stacks + @foundations).each do |stack|
           if stack_drag = stack.take_pressed_stack
             @stack_drag = stack_drag
             @stack_drag_delta = Game::Mouse.position - stack_drag.position
@@ -119,7 +130,7 @@ module Cards
 
             # release stack
             unless Game::Mouse::Left.down?
-              if to_stack = @stacks.find(&.drop?(stack))
+              if to_stack = (@stacks + @foundations).find(&.drop?(stack))
                 @stack_drag_to_stack = to_stack
               end
 

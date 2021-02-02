@@ -1,3 +1,5 @@
+require "./stack"
+
 module Cards
   module Solitare
     class Waste < Stack
@@ -23,13 +25,13 @@ module Cards
         any? && cards.last.mouse_in?
       end
 
-      def take_pressed_stack
+      def take_pressed_stack : Stack?
         return unless pressed?
         return if empty?
 
         card = take
 
-        self.class.new(x: card.x, y: card.y, cards: [card])
+        Stack.new(x: card.x, y: card.y, cards: [card])
       end
     end
   end

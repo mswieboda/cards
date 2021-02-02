@@ -1,9 +1,9 @@
 module Cards
   enum Suit
-    Diamonds
     Clubs
-    Hearts
+    Diamonds
     Spades
+    Hearts
 
     def sprite_sym
       case self

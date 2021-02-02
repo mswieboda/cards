@@ -46,7 +46,7 @@ module Cards
         )
       end
 
-      def take_pressed_stack
+      def take_pressed_stack : Stack?
         return unless pressed?
         return if empty?
 
@@ -57,7 +57,7 @@ module Cards
         index = @cards.size - 1 - index
         card = @cards[index]
 
-        self.class.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
+        Stack.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
       end
 
       def drop?(stack : Stack)
