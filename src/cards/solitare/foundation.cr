@@ -64,7 +64,7 @@ module Cards
         )
       end
 
-      def drop?(stack : Stack, auto = false)
+      def add?(stack : Stack, auto = false)
         return false if stack.size != 1 || (!auto && !mouse_in?)
 
         bottom = stack.cards.first

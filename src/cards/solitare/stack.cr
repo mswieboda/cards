@@ -60,7 +60,7 @@ module Cards
         Stack.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
       end
 
-      def drop?(stack : Stack)
+      def add?(stack : Stack, _auto = false)
         return false if stack.empty? || !mouse_in?
         return true if empty?
 
@@ -68,6 +68,22 @@ module Cards
         bottom = stack.cards.first
 
         top.rank.value == bottom.rank.value + 1 && !top.suit.pair?(bottom.suit)
+      end
+
+      def flip_up_top_card?
+        return false if empty? || !mouse_in? || !Game::Mouse::Left.pressed?
+
+        top = @cards.last
+
+        top.flipped?
+      end
+
+      def flip_up_top_card
+        return if empty?
+
+        top = @cards.last
+
+        top.flip if top.flipped?
       end
     end
   end

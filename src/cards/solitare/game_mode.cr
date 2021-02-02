@@ -70,6 +70,7 @@ module Cards
         @waste.update(frame_time)
 
         move_cards_to_waste
+        flip_up_stack_top_card
         drag_stack(frame_time)
       end
 
@@ -97,6 +98,12 @@ module Cards
           # move from stock to waste
           card.move(@waste.add_position)
           @cards << card
+        end
+      end
+
+      def flip_up_stack_top_card
+        if stack = @stacks.find(&.flip_up_top_card?)
+          stack.flip_up_top_card
         end
       end
 
@@ -130,7 +137,7 @@ module Cards
 
             # release stack
             unless Game::Mouse::Left.down?
-              if to_stack = (@stacks + @foundations).find(&.drop?(stack))
+              if to_stack = (@stacks + @foundations).find(&.add?(stack))
                 @stack_drag_to_stack = to_stack
               end
 
@@ -142,7 +149,7 @@ module Cards
           # check for move to foundation
           # TODO: switch to left mouse double click, or left & right click
           if Game::Mouse::Left.down? && Game::Key::Space.pressed?
-            if foundation = @foundations.find(&.drop?(stack: stack, auto: true))
+            if foundation = @foundations.find(&.add?(stack: stack, auto: true))
               @stack_drag_to_stack = foundation
               @stack_drag_released = true
               stack.move(@stack_drag_to_stack.add_position)
