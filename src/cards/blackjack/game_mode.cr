@@ -39,6 +39,8 @@ module Cards
       end
 
       def update(frame_time)
+        super
+
         @manager.update(frame_time)
       end
 

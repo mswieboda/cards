@@ -72,7 +72,7 @@ module Cards
       end
 
       def log(method, message = "")
-        return unless Main::DEBUG
+        return unless Main.debug?
         puts ">>> #{log_name}##{method}#{message.presence && " > #{message}"}"
       end
 

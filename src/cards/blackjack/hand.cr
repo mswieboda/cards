@@ -170,7 +170,7 @@ module Cards
 
       # TODO: take this out, use SeatPlayer's log somehow, procs?
       def log(method, message = "")
-        return unless Main::DEBUG
+        return unless Main.debug?
         puts ">>> #{log_name}##{method}#{message.presence && " > #{message}"}"
       end
 

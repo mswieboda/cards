@@ -1,9 +1,13 @@
 module Cards
   class Main < Game::Game
-    DEBUG = false
+    DEBUG = true
     TARGET_FPS = 60
 
     @game : GameMode
+
+    def self.debug?
+      DEBUG
+    end
 
     def initialize
       super(
@@ -12,8 +16,8 @@ module Cards
         screen_height: 640,
         target_fps: TARGET_FPS,
         audio: false,
-        debug: DEBUG,
-        draw_fps: DEBUG
+        draw_fps: self.class.debug?,
+        exit_with_esc: false,
       )
 
       load_sprites

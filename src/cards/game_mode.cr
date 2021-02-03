@@ -9,7 +9,7 @@ module Cards
     end
 
     def update(frame_time)
-
+      exit if Game::Key::Escape.pressed?
     end
 
     def draw
@@ -20,6 +20,10 @@ module Cards
         height: Main.screen_height,
         color: Game::Color::Green
       ).draw
+    end
+
+    def exit
+      @exit = true
     end
   end
 end

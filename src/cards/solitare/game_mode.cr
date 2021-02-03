@@ -21,7 +21,6 @@ module Cards
       def initialize
         super
 
-
         @deal_index = 0
         @deal_row_index = 0
         @dealt = false
@@ -62,6 +61,8 @@ module Cards
       end
 
       def update(frame_time)
+        super
+
         @cards.each(&.update(frame_time))
 
         return if !dealt? && deal
