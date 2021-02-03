@@ -62,18 +62,9 @@ module Cards
         @stack_drag_released = false
 
         @menu = Popup.new(items: %w(new load back exit))
+        @menu_load = Popup.new(items: %w(foo bar back))
 
-        @menu.on("new") do
-          puts ">>> new game"
-        end
-
-        @menu.on("load") do
-          puts ">>> load"
-        end
-
-        @menu.on("back") do
-          @menu.hide
-        end
+        menu_handlers
       end
 
       def update(frame_time)
@@ -81,7 +72,7 @@ module Cards
 
         deal if !dealt?
 
-        return if menu_update(frame_time)
+        return if update_menus(frame_time)
         return unless dealt?
         return if clear_waste(frame_time)
         return if move_cards_to_waste
@@ -101,7 +92,9 @@ module Cards
           stack.draw
         end
 
-        @menu.draw if @menu.shown?
+        [@menu, @menu_load].each do |menu|
+          menu.draw if menu.shown?
+        end
       end
 
       def move_cards_to_waste
@@ -236,15 +229,33 @@ module Cards
         @cards << card
       end
 
-      def menu_update(frame_time)
-        if @menu.shown?
-          @menu.update(frame_time)
+      def menu_handlers
+        @menu.on("load") do
+          @menu_load.show
+        end
 
-          @menu.hide if @menu.done?
-          exit if @menu.exit?
+        @menu.on("back") do
+          # nothing, menu already hides
+        end
 
-          return true
-        elsif Key.menu.pressed?
+        @menu_load.on("back") do
+          @menu.show
+        end
+      end
+
+      def update_menus(frame_time)
+        [@menu, @menu_load].each do |menu|
+          if menu.shown?
+            menu.update(frame_time)
+
+            menu.hide if menu.done?
+            exit if menu.exit?
+
+            return true
+          end
+        end
+
+        if Key.menu.pressed?
           @menu.show
           return true
         end
