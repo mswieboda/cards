@@ -15,5 +15,13 @@ module Cards
     def self.cancel_keys
       [Game::Key::Escape, Game::Key::Backspace]
     end
+
+    def self.exit
+      Game::Key::Escape
+    end
+
+    def self.menu
+      Game::Key::Escape
+    end
   end
 end

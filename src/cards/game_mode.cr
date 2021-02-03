@@ -1,6 +1,5 @@
 module Cards
   abstract class GameMode
-    getter? exit
     getter? game_over
 
     def initialize
@@ -9,7 +8,6 @@ module Cards
     end
 
     def update(frame_time)
-      exit if Game::Key::Escape.pressed?
     end
 
     def draw
@@ -22,8 +20,8 @@ module Cards
       ).draw
     end
 
-    def exit
-      @exit = true
+    def exit?
+      Key.exit.pressed?
     end
   end
 end

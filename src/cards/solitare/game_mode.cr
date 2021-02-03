@@ -1,6 +1,7 @@
 module Cards
   module Solitare
     class GameMode < Cards::GameMode
+      getter? exit
       getter? dealt
       getter? clearing_waste
 
@@ -21,6 +22,7 @@ module Cards
       def initialize
         super
 
+        @exit = false
         @deal_index = 0
         @deal_row_index = 0
         @dealt = false
@@ -58,14 +60,29 @@ module Cards
         @stack_drag_delta = Game::Vector.zero
         @stack_drag_to_stack = @waste
         @stack_drag_released = false
+
+        @menu = Popup.new(items: %w(new load back exit))
+
+        @menu.on("new") do
+          puts ">>> new game"
+        end
+
+        @menu.on("load") do
+          puts ">>> load"
+        end
+
+        @menu.on("back") do
+          @menu.hide
+        end
       end
 
       def update(frame_time)
-        super
-
         @cards.each(&.update(frame_time))
 
-        return if !dealt? && deal
+        deal if !dealt?
+
+        return if menu_update(frame_time)
+        return unless dealt?
         return if clear_waste(frame_time)
         return if move_cards_to_waste
         return if flip_up_stack_top_card
@@ -83,6 +100,8 @@ module Cards
         if stack = @stack_drag
           stack.draw
         end
+
+        @menu.draw if @menu.shown?
       end
 
       def move_cards_to_waste
@@ -215,6 +234,20 @@ module Cards
         card = @stock.take
         card.move(@stacks[deal_stack_index].add_position)
         @cards << card
+      end
+
+      def menu_update(frame_time)
+        if @menu.shown?
+          @menu.update(frame_time)
+
+          @menu.hide if @menu.done?
+          exit if @menu.exit?
+
+          return true
+        elsif Key.menu.pressed?
+          @menu.show
+          return true
+        end
       end
     end
   end
