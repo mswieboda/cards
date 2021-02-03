@@ -1,10 +1,21 @@
-require "./menu"
-
 module Cards
-  class MainMenu < Menu
-    def initialize(items = [] of String)
-      super(items)
+  class SaveMenu < Popup
+    def initialize(title = "save")
+      super(title: title, items: %w(input_name save back))
+
       @handlers = Hash(String, Proc(Nil)).new
+
+      self.on("back") do
+        back
+      end
+    end
+
+    def name
+      if item = @items.find { |i| i.name == "input_name" }
+        item.text
+      else
+        ""
+      end
     end
 
     def select_item
@@ -14,21 +25,10 @@ module Cards
         @done = true
         callback.call
       end
-
-      if item.text == "exit"
-        @exit = true
-      end
     end
 
     def back
-      @exit = true
-    end
-
-    def draw
-      return unless shown?
-
-      draw_header("cards")
-      super
+      @done = true
     end
 
     def on(item, &block : Proc(Nil))

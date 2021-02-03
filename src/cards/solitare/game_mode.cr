@@ -63,8 +63,9 @@ module Cards
         @stack_drag_to_stack = @waste
         @stack_drag_released = false
 
-        @menu = Popup.new(items: %w(new load back exit))
+        @menu = Popup.new(items: %w(new save load back exit))
         @menu_load = Popup.new(items: %w(back))
+        @menu_save = SaveMenu.new
 
         menu_handlers
         create_save_dirs
@@ -95,7 +96,7 @@ module Cards
           stack.draw
         end
 
-        [@menu, @menu_load].each do |menu|
+        [@menu, @menu_save, @menu_load].each do |menu|
           menu.draw if menu.shown?
         end
       end
@@ -233,6 +234,11 @@ module Cards
       end
 
       def menu_handlers
+        # menu
+        @menu.on("save") do
+          @menu_save.show
+        end
+
         @menu.on("load") do
           @menu_load.show
 
@@ -250,10 +256,16 @@ module Cards
           end
         end
 
-        @menu.on("back") do
-          # nothing, menu already hides
+        # save
+        @menu_save.on("input_name") do
+          save
         end
 
+        @menu_save.on("save") do
+          save
+        end
+
+        # load
         @menu_load.on("back") do
           @menu.show
         end
@@ -264,7 +276,7 @@ module Cards
       end
 
       def update_menus(frame_time)
-        [@menu, @menu_load].each do |menu|
+        [@menu, @menu_save, @menu_load].each do |menu|
           if menu.shown?
             menu.update(frame_time)
 
@@ -279,6 +291,13 @@ module Cards
           @menu.show
           return true
         end
+      end
+
+      def save
+        path = Path[Game::Utils.expand_path(SAVE_PATH)].join("#{@menu_save.name}.cc_save")
+        File.write(path, "foo, bar, save!")
+
+        puts ">>> save #{path}"
       end
     end
   end

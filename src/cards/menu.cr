@@ -12,13 +12,13 @@ module Cards
       @focus_index = 0
       @done = false
 
-      @items = items.map { |item| MenuItem.new(text: item) }
+      @items = items.map { |item| item.starts_with?("input_") ? MenuItemInput.new(name: item) : MenuItem.new(name: item) }
 
       arrange_items
     end
 
     def items=(items : Array(String))
-      @items = items.map { |item| MenuItem.new(text: item) }
+      @items = items.map { |item| item.starts_with?("input_") ? MenuItemInput.new(name: item) : MenuItem.new(name: item) }
 
       arrange_items
     end
@@ -45,6 +45,25 @@ module Cards
 
     def update(frame_time)
       return unless shown?
+
+      @items.select(&.is_a?(MenuItemInput)).map(&.as(MenuItemInput)).each do |menu_item_input|
+        menu_item_input.update(frame_time)
+        menu_item_input.x = Main.screen_width / 2_f32 - menu_item_input.width / 2_f32
+
+        if menu_item_input.focused?
+          if Game::Key::Down.pressed?
+            focus_next
+          elsif Game::Key::Up.pressed?
+            focus_last
+          elsif Game::Key::Enter.pressed?
+            select_item
+          elsif Game::Key::Escape.pressed?
+            back
+          end
+
+          return
+        end
+      end
 
       if Game::Keys.pressed?(Key.down_keys)
         focus_next
@@ -86,7 +105,7 @@ module Cards
       x = Main.screen_width / 2_f32
       y = padding
 
-      item = MenuItem.new(x: x, y: y, text: text, padding: padding)
+      item = MenuItem.new(name: text, x: x, y: y, padding: padding)
       item.x = x - item.width / 2_f32
 
       Game::Rectangle.new(

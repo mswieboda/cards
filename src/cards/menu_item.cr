@@ -1,17 +1,18 @@
 module Cards
   class MenuItem
-    PADDING = 25
-    TEXT_SIZE = 21
-
+    getter name : String
     getter? focused
 
     @padding : Int32
 
     delegate :text, to: @text
 
-    def initialize(x = 0, y = 0, text = "", color = Game::Color::Lime, @focused = false, @padding = PADDING)
+    PADDING = 25
+    TEXT_SIZE = 21
+
+    def initialize(@name, x = 0, y = 0, color = Game::Color::Lime, @focused = false, @padding = PADDING)
       @text = Game::Text.new(
-        text: text,
+        text: name,
         x: x + @padding,
         y: y + @padding,
         size: TEXT_SIZE,

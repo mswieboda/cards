@@ -7,17 +7,21 @@ module Cards
     def initialize(@title = "", items = [] of String)
       super(items)
       @handlers = Hash(String, Proc(Nil)).new
+
+      self.on("back") do
+        back
+      end
     end
 
     def select_item
       item = @items[@focus_index]
 
-      if callback = @handlers[item.text]?
+      if callback = @handlers[item.name]?
         @done = true
         callback.call
       end
 
-      if item.text == "exit"
+      if item.name == "exit"
         @exit = true
       end
     end
