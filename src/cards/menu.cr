@@ -17,6 +17,12 @@ module Cards
       arrange_items
     end
 
+    def items=(items : Array(String))
+      @items = items.map { |item| MenuItem.new(text: item) }
+
+      arrange_items
+    end
+
     def items_width
       @items.map(&.width).max
     end

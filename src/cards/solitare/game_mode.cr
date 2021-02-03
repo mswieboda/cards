@@ -9,6 +9,8 @@ module Cards
       FAN_STACKS = 7
       DEAL_CARDS = (FAN_STACKS + 1).times.to_a.sum
 
+      SAVE_PATH = "./saves/solitare"
+
       @stock : Stock
       @waste : Waste
       @stacks : Array(Stack)
@@ -62,9 +64,10 @@ module Cards
         @stack_drag_released = false
 
         @menu = Popup.new(items: %w(new load back exit))
-        @menu_load = Popup.new(items: %w(foo bar back))
+        @menu_load = Popup.new(items: %w(back))
 
         menu_handlers
+        create_save_dirs
       end
 
       def update(frame_time)
@@ -232,6 +235,19 @@ module Cards
       def menu_handlers
         @menu.on("load") do
           @menu_load.show
+
+          path = Dir.new(Game::Utils.expand_path(SAVE_PATH))
+          items = path.children.select(&.ends_with?(".cc_save")).map do |file_path|
+            Path[file_path].normalize
+          end
+
+          @menu_load.items = items.map(&.stem) + ["back"]
+
+          items.each do |item|
+            @menu_load.on(item.stem) do
+              puts ">>> load #{item}"
+            end
+          end
         end
 
         @menu.on("back") do
@@ -241,6 +257,10 @@ module Cards
         @menu_load.on("back") do
           @menu.show
         end
+      end
+
+      def create_save_dirs
+        Dir.mkdir_p(Game::Utils.expand_path(SAVE_PATH))
       end
 
       def update_menus(frame_time)
