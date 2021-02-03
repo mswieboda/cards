@@ -1,6 +1,8 @@
+require "./stock"
+
 module Cards
   module Solitare
-    class Stack < CardStack
+    class Stack < Stock
       MARGIN_X = 0
       MARGIN_Y = 25
 

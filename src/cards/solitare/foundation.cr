@@ -19,18 +19,7 @@ module Cards
       def draw(screen_x = 0, screen_y = 0)
         super
 
-        color = Game::Color::Black.alpha(33_u8)
-
         if empty?
-          Game::RoundedRectangle.new(
-            x: screen_x + x,
-            y: screen_y + y,
-            width: width,
-            height: height,
-            roundness: 0.15_f32,
-            color: Game::Color::Black.alpha(33_u8)
-          ).draw
-
           @sprite.draw(
             x: screen_x + x + width / 2_f32,
             y: screen_y + y + height / 2_f32,

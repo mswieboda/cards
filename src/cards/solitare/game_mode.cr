@@ -8,7 +8,7 @@ module Cards
       FAN_STACKS = 7
       DEAL_CARDS = (FAN_STACKS + 1).times.to_a.sum
 
-      @stock : CardStack
+      @stock : Stock
       @waste : Waste
       @stacks : Array(Stack)
       @foundations : Array(Foundation)
@@ -21,16 +21,17 @@ module Cards
       def initialize
         super
 
+
         @deal_index = 0
         @deal_row_index = 0
         @dealt = false
         @clearing_waste = false
 
         deck = StandardDeck.new(jokers: false)
-        @stock = CardStack.new(
+        @stock = Stock.new(
           x: MARGIN,
           y: MARGIN,
-          cards: deck.cards.clone
+          cards: deck.cards.clone.shuffle!
         )
 
         @waste = Waste.new(
