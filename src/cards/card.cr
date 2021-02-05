@@ -1,5 +1,9 @@
+require "json"
+
 module Cards
   class Card
+    include JSON::Serializable
+
     property position : Game::Vector
     property rank : Rank
     property suit : Suit

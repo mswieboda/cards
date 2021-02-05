@@ -5,21 +5,33 @@ module Cards
       getter? dealt
       getter? clearing_waste
 
+      getter stock : Stock
+      getter waste : Waste
+      getter stacks : Array(Stack)
+      getter foundations : Array(Foundation)
+      getter cards : Array(Card)
+      getter stack_drag : Stack?
+      getter stack_drag_delta : Game::Vector
+      getter stack_drag_to_stack : CardStack
+      getter? stack_drag_released : Bool
+
+      @[JSON::Field(ignore: true)]
+      @deck : Deck = StandardDeck.new(jokers: false)
+
+      @[JSON::Field(ignore: true)]
+      @menu : Popup = Popup.new(items: %w(new save load back exit))
+
+      @[JSON::Field(ignore: true)]
+      @menu_load : Popup = Popup.new(items: %w(back))
+
+      @[JSON::Field(ignore: true)]
+      @menu_save : SaveMenu = SaveMenu.new
+
       MARGIN = 25
       FAN_STACKS = 7
       DEAL_CARDS = (FAN_STACKS + 1).times.to_a.sum
 
       SAVE_PATH = "./saves/solitare"
-
-      @stock : Stock
-      @waste : Waste
-      @stacks : Array(Stack)
-      @foundations : Array(Foundation)
-      @cards : Array(Card)
-      @stack_drag : Stack?
-      @stack_drag_delta : Game::Vector
-      @stack_drag_to_stack : CardStack
-      @stack_drag_released : Bool
 
       def initialize
         super
@@ -30,7 +42,7 @@ module Cards
         @dealt = false
         @clearing_waste = false
 
-        @deck = StandardDeck.new(jokers: false)
+        # @deck = StandardDeck.new(jokers: false)
         @stock = Stock.new(
           x: MARGIN,
           y: MARGIN,
@@ -63,9 +75,9 @@ module Cards
         @stack_drag_to_stack = @waste
         @stack_drag_released = false
 
-        @menu = Popup.new(items: %w(new save load back exit))
-        @menu_load = Popup.new(items: %w(back))
-        @menu_save = SaveMenu.new
+        # @menu = Popup.new(items: %w(new save load back exit))
+        # @menu_load = Popup.new(items: %w(back))
+        # @menu_save = SaveMenu.new
 
         menu_handlers
         create_save_dirs
@@ -86,6 +98,7 @@ module Cards
 
       def draw
         super
+
         @stock.draw(@deck)
         @waste.draw(@deck)
         @foundations.each(&.draw(@deck))
@@ -251,7 +264,7 @@ module Cards
 
           items.each do |item|
             @menu_load.on(item.stem) do
-              puts ">>> load #{item}"
+              load(item)
             end
           end
         end
@@ -295,9 +308,41 @@ module Cards
 
       def save
         path = Path[Game::Utils.expand_path(SAVE_PATH)].join("#{@menu_save.name}.cc_save")
-        File.write(path, "foo, bar, save!")
+
+        puts ">>> saving #{self.class.to_s}:"
+        json = to_json
+        puts json
+
+        File.write(path, json)
 
         puts ">>> save #{path}"
+      end
+
+      def load(file_name : Path)
+        file_path = Path[Game::Utils.expand_path(SAVE_PATH)].join(file_name)
+        puts ">>> load #{file_path}"
+
+        json = File.read(file_path)
+        game = Solitare::GameMode.from_json(json)
+
+        load_from(game)
+      end
+
+      def load_from(game : Solitare::GameMode)
+        @exit = game.exit?
+        @dealt = game.dealt?
+        @clearing_waste = game.clearing_waste?
+        @game_over = game.game_over?
+
+        @stock = game.stock
+        @waste = game.waste
+        @stacks = game.stacks
+        @foundations = game.foundations
+        @cards = game.cards
+        @stack_drag = game.stack_drag
+        @stack_drag_delta = game.stack_drag_delta
+        @stack_drag_to_stack = game.stack_drag_to_stack
+        @stack_drag_released = game.stack_drag_released?
       end
     end
   end

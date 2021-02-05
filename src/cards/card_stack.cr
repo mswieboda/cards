@@ -1,5 +1,9 @@
+require "json"
+
 module Cards
   class CardStack
+    include JSON::Serializable
+
     property position : Game::Vector
     property cards : Array(Card)
 

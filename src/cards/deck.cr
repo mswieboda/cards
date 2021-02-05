@@ -1,5 +1,7 @@
 module Cards
   abstract class Deck
+    include JSON::Serializable
+
     property back : CardBack
     property front : CardFront
     property cards : Array(Card)

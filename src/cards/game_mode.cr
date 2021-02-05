@@ -1,5 +1,9 @@
+require "json"
+
 module Cards
   abstract class GameMode
+    include JSON::Serializable
+
     getter? game_over
 
     def initialize

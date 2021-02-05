@@ -5,7 +5,8 @@ module Cards
     class Foundation < Waste
       getter suit : Suit
 
-      @sprite : Game::Sprite
+      # @[JSON::Field(ignore: true)]
+      # @sprite : Game::Sprite
 
       MARGIN_X = 0
       MARGIN_Y = 0
@@ -13,19 +14,19 @@ module Cards
       def initialize(@suit, x = 0, y = 0, cards = [] of Card)
         super(x: x, y: y, cards: cards)
 
-        @sprite = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
+        # @sprite = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
       end
 
       def draw(deck : Deck, screen_x = 0, screen_y = 0)
         super
 
         if empty?
-          @sprite.draw(
-            x: screen_x + x + width / 2_f32,
-            y: screen_y + y + height / 2_f32,
-            centered: true,
-            tint: Game::Color::Black.alpha(33_u8)
-          )
+          # @sprite.draw(
+          #   x: screen_x + x + width / 2_f32,
+          #   y: screen_y + y + height / 2_f32,
+          #   centered: true,
+          #   tint: Game::Color::Black.alpha(33_u8)
+          # )
         end
       end
 
