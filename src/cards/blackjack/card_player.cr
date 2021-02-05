@@ -53,18 +53,18 @@ module Cards
         end
       end
 
-      def draw(screen_x = 0, screen_y = 0)
+      def draw(deck : Deck, screen_x = 0, screen_y = 0)
         chip_tray.draw(screen_x, screen_y)
 
-        draw_hands(screen_x, screen_y)
+        draw_hands(deck, screen_x, screen_y)
       end
 
       def draw_bets?
         false
       end
 
-      def draw_hands(screen_x, screen_y)
-        hands.each(&.draw(screen_x: screen_x, screen_y: screen_y, bets: draw_bets?))
+      def draw_hands(deck : Deck, screen_x, screen_y)
+        hands.each(&.draw(deck: deck, screen_x: screen_x, screen_y: screen_y, bets: draw_bets?))
       end
 
       def log_name

@@ -1,7 +1,6 @@
 module Cards
   class Card
     property position : Game::Vector
-    property deck : Deck
     property rank : Rank
     property suit : Suit
     property? flipped
@@ -21,7 +20,7 @@ module Cards
 
     MOVEMENT_FRAMES = 16
 
-    def initialize(@deck, @rank, @suit, @flipped = true, @position = Game::Vector.new)
+    def initialize(@rank, @suit, @flipped = true, @position = Game::Vector.new)
       @move_to = nil
       @move_delta = Game::Vector.new
     end
@@ -44,7 +43,6 @@ module Cards
 
     def clone : Card
       Card.new(
-        deck: deck,
         rank: rank,
         suit: suit,
         flipped: flipped?,
@@ -122,18 +120,18 @@ module Cards
       end
     end
 
-    def draw(screen_x = 0, screen_y = 0)
+    def draw(deck, screen_x = 0, screen_y = 0)
       draw_shadow(screen_x, screen_y)
 
       if flipped?
-        @deck.back.draw(
+        deck.back.draw(
           screen_x: screen_x + x,
           screen_y: screen_y + y,
           width: width,
           height: height
         )
       else
-        @deck.front.draw(
+        deck.front.draw(
           card: self,
           screen_x: screen_x + x,
           screen_y: screen_y + y

@@ -16,7 +16,7 @@ module Cards
         @sprite = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
       end
 
-      def draw(screen_x = 0, screen_y = 0)
+      def draw(deck : Deck, screen_x = 0, screen_y = 0)
         super
 
         if empty?

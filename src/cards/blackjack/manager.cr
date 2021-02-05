@@ -71,16 +71,16 @@ module Cards
 
       def draw(screen_x = 0, screen_y = 0)
         # for shuffling
-        @cards.each(&.draw(screen_x, screen_y))
+        @cards.each(&.draw(deck, screen_x, screen_y))
 
         # card stacks
-        @deck_stack.draw(screen_x, screen_y)
-        @discard_stack.draw(screen_x, screen_y)
-        @shuffle_stack.draw(screen_x, screen_y)
+        @deck_stack.draw(deck, screen_x, screen_y)
+        @discard_stack.draw(deck, screen_x, screen_y)
+        @shuffle_stack.draw(deck, screen_x, screen_y)
 
         # players
-        dealer.draw(screen_x, screen_y)
-        seat_players.each(&.draw(screen_x, screen_y))
+        dealer.draw(deck, screen_x, screen_y)
+        seat_players.each(&.draw(deck, screen_x, screen_y))
       end
 
       def turn_player

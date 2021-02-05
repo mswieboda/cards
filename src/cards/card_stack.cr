@@ -33,12 +33,12 @@ module Cards
 
           # if we've reached or gone past `move_to`, snap to it
           if (@move_delta.x.sign >= 0 && @move_delta.x + @position.x >= move_to.x) ||
-            (@move_delta.x.sign < 0 && @move_delta.x + @position.x <= move_to.x)
+             (@move_delta.x.sign < 0 && @move_delta.x + @position.x <= move_to.x)
             @position.x = move_to.x
           end
 
           if (@move_delta.y.sign >= 0 && @move_delta.y + @position.y >= move_to.y) ||
-            (@move_delta.y.sign < 0 && @move_delta.y + @position.y <= move_to.y)
+             (@move_delta.y.sign < 0 && @move_delta.y + @position.y <= move_to.y)
             @position.y = move_to.y
           end
 
@@ -50,8 +50,8 @@ module Cards
       end
     end
 
-    def draw(screen_x = 0, screen_y = 0)
-      @cards.each(&.draw(screen_x, screen_y))
+    def draw(deck : Deck, screen_x = 0, screen_y = 0)
+      @cards.each(&.draw(deck, screen_x, screen_y))
     end
 
     def x=(value : Int32 | Float32)

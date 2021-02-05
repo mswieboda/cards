@@ -1,7 +1,7 @@
 module Cards
   module Solitare
     class Stock < CardStack
-      def draw(screen_x = 0, screen_y = 0)
+      def draw(deck : Deck, screen_x = 0, screen_y = 0)
         super
 
         if empty?

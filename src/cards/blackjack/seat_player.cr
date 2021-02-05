@@ -87,12 +87,12 @@ module Cards
         @chip_tray.chip_value
       end
 
-      def draw(screen_x = 0, screen_y = 0)
+      def draw(deck : Deck, screen_x = 0, screen_y = 0)
         chip_tray.draw(screen_x, screen_y)
 
         # @chips.select { |c| c.y <= @chip_stack_bet.top_y }.each(&.draw(screen_x, screen_y))
 
-        draw_hands(screen_x, screen_y)
+        draw_hands(deck, screen_x, screen_y)
 
         # TODO: fix these so not overlapping, and not on top of chip tray
         draw_balance(screen_x, screen_y)

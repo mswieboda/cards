@@ -30,11 +30,11 @@ module Cards
         @dealt = false
         @clearing_waste = false
 
-        deck = StandardDeck.new(jokers: false)
+        @deck = StandardDeck.new(jokers: false)
         @stock = Stock.new(
           x: MARGIN,
           y: MARGIN,
-          cards: deck.cards.clone.shuffle!
+          cards: @deck.cards.clone.shuffle!
         )
 
         @waste = Waste.new(
@@ -86,14 +86,14 @@ module Cards
 
       def draw
         super
-        @stock.draw
-        @waste.draw
-        @foundations.each(&.draw)
-        @stacks.each(&.draw)
-        @cards.each(&.draw)
+        @stock.draw(@deck)
+        @waste.draw(@deck)
+        @foundations.each(&.draw(@deck))
+        @stacks.each(&.draw(@deck))
+        @cards.each(&.draw(@deck))
 
         if stack = @stack_drag
-          stack.draw
+          stack.draw(@deck)
         end
 
         [@menu, @menu_save, @menu_load].each do |menu|

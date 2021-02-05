@@ -95,8 +95,8 @@ module Cards
         @cards.each(&.update(frame_time))
       end
 
-      def draw(screen_x, screen_y, bets = false)
-        @cards.each(&.draw(screen_x, screen_y))
+      def draw(deck : Deck, screen_x, screen_y, bets = false)
+        @cards.each(&.draw(deck, screen_x, screen_y))
 
         last_y = draw_hand_display(screen_x, screen_y)
         draw_message(screen_x, screen_y, last_y)
@@ -285,7 +285,7 @@ module Cards
         end
       end
 
-      def win( payout_ratio : Int32 | Float32 = 1)
+      def win(payout_ratio : Int32 | Float32 = 1)
         @payout = (payout_ratio * bet).to_i
         log(:win, "#{@payout}")
         @result = Result::Win
