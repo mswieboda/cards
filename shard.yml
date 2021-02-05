@@ -8,11 +8,11 @@ targets:
   cards:
     main: src/cards.cr
 
-crystal: 0.36.0
+crystal: 0.36.1
 
 license: MIT
 
 dependencies:
   game:
     github: mswieboda/game
-    version: 0.3.7
+    version: 0.3.8
