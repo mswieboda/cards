@@ -6,7 +6,8 @@ module Cards
       getter suit : Suit
 
       # @[JSON::Field(ignore: true)]
-      # @sprite : Game::Sprite
+      @[JSON::Field(converter: Cards::Solitare::FoundationSpriteConverter)]
+      @sprite : Game::Sprite
 
       MARGIN_X = 0
       MARGIN_Y = 0
@@ -14,19 +15,19 @@ module Cards
       def initialize(@suit, x = 0, y = 0, cards = [] of Card)
         super(x: x, y: y, cards: cards)
 
-        # @sprite = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
+        @sprite = Game::Sprite.get(suit.sprite_sym).resize(32, 32)
       end
 
       def draw(deck : Deck, screen_x = 0, screen_y = 0)
         super
 
         if empty?
-          # @sprite.draw(
-          #   x: screen_x + x + width / 2_f32,
-          #   y: screen_y + y + height / 2_f32,
-          #   centered: true,
-          #   tint: Game::Color::Black.alpha(33_u8)
-          # )
+          @sprite.draw(
+            x: screen_x + x + width / 2_f32,
+            y: screen_y + y + height / 2_f32,
+            centered: true,
+            tint: Game::Color::Black.alpha(33_u8)
+          )
         end
       end
 
@@ -65,6 +66,16 @@ module Cards
         top = @cards.last
 
         bottom.rank.value == top.rank.value + 1
+      end
+    end
+
+    module FoundationSpriteConverter
+      def self.from_json(value : JSON::PullParser) : Game::Sprite
+        Game::Sprite.get(Cards::Suit.sym_from_sprite_string(value.read_string)).resize(32, 32)
+      end
+
+      def self.to_json(value : Game::Sprite, json : JSON::Builder)
+        json.string(value.name)
       end
     end
   end

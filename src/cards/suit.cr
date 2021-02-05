@@ -5,6 +5,21 @@ module Cards
     Spades
     Hearts
 
+    def self.sym_from_sprite_string(string : String)
+      case string
+      when "diamonds"
+        :diamonds
+      when "clubs"
+        :clubs
+      when "hearts"
+        :hearts
+      when "spades"
+        :spades
+      else
+        raise "Suit.sym_from_sprite_string error sym not found: #{string}"
+      end
+    end
+
     def sprite_sym
       case self
       when Diamonds
