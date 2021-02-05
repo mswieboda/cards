@@ -5,6 +5,9 @@ module Cards
       getter? dealt
       getter? clearing_waste
 
+      getter deal_index
+      getter deal_row_index
+
       getter stock : Stock
       getter waste : Waste
       getter stacks : Array(Stack)
@@ -333,6 +336,9 @@ module Cards
         @dealt = game.dealt?
         @clearing_waste = game.clearing_waste?
         @game_over = game.game_over?
+
+        @deal_index = game.deal_index
+        @deal_row_index = game.deal_row_index
 
         @stock = game.stock
         @waste = game.waste
