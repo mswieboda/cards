@@ -13,6 +13,7 @@ module Cards
       getter stacks : Array(Stack)
       getter foundations : Array(Foundation)
       getter cards : Array(Card)
+      getter cards_to_foundation : Array({card: Card, stack: Foundation})
       getter stack_drag : Stack?
       getter stack_drag_delta : Game::Vector
       getter stack_drag_to_stack : CardStack
@@ -45,7 +46,6 @@ module Cards
         @dealt = false
         @clearing_waste = false
 
-        # @deck = StandardDeck.new(jokers: false)
         @stock = Stock.new(
           x: MARGIN,
           y: MARGIN,
@@ -78,9 +78,7 @@ module Cards
         @stack_drag_to_stack = @waste
         @stack_drag_released = false
 
-        # @menu = Popup.new(items: %w(new save load back exit))
-        # @menu_load = Popup.new(items: %w(back))
-        # @menu_save = SaveMenu.new
+        @cards_to_foundation = [] of {card: Card, stack: Foundation}
 
         menu_handlers
         create_save_dirs
@@ -88,6 +86,9 @@ module Cards
 
       def update(frame_time)
         @cards.each(&.update(frame_time))
+        @cards_to_foundation.map(&.[:card]).each(&.update(frame_time))
+
+        ([@waste] + @stacks).each(&.update(frame_time))
 
         deal if !dealt?
 
@@ -95,6 +96,7 @@ module Cards
         return unless dealt?
         return if clear_waste(frame_time)
         return if move_cards_to_waste
+        return if move_cards_to_foundation
         return if flip_up_stack_top_card
         return if drag_stack(frame_time)
       end
@@ -107,6 +109,7 @@ module Cards
         @foundations.each(&.draw(@deck))
         @stacks.each(&.draw(@deck))
         @cards.each(&.draw(@deck))
+        @cards_to_foundation.map(&.[:card]).each(&.draw(@deck))
 
         if stack = @stack_drag
           stack.draw(@deck)
@@ -129,6 +132,22 @@ module Cards
           card.move(@waste.add_position)
           @cards << card
           return true
+        end
+      end
+
+      def move_cards_to_foundation
+        @cards_to_foundation.select { |t| t[:card].moved? }.each do |t|
+          @cards_to_foundation.delete(t)
+          t[:stack].add(t[:card])
+        end
+
+        if stack = ([@waste] + @stacks).find{ |s| s.any? && s.double_clicked? }
+          if foundation = @foundations.find(&.add?(stack.cards.last))
+            card = stack.take
+            card.move(foundation.add_position)
+            @cards_to_foundation << {card: card, stack: foundation}
+            return true
+          end
         end
       end
 
@@ -169,23 +188,8 @@ module Cards
 
             # release stack
             unless Game::Mouse::Left.down?
-              if to_stack = (@stacks + @foundations).find(&.add?(stack))
-                @stack_drag_to_stack = to_stack
-              end
-
               stack.move(@stack_drag_to_stack.add_position)
               @stack_drag_released = true
-            end
-          end
-
-          # check for move to foundation
-          # TODO: switch to left mouse double click, or left & right click
-          if Game::Mouse::Left.down? && Game::Key::Space.pressed?
-            if foundation = @foundations.find(&.add?(stack: stack, auto: true))
-              @stack_drag_to_stack = foundation
-              @stack_drag_released = true
-              stack.move(@stack_drag_to_stack.add_position)
-              return true
             end
           end
         end

@@ -6,6 +6,12 @@ module Cards
       MARGIN_X = 0
       MARGIN_Y = 25
 
+      DOUBLE_CLICK_MILLISECONDS = 333
+
+      @[JSON::Field(ignore: true)]
+      @last_click_time : Time::Span?
+      @double_clicked = false
+
       def self.margin_x
         MARGIN_X
       end
@@ -32,6 +38,23 @@ module Cards
 
       def height
         super + @cards.size * margin_y
+      end
+
+      def update(frame_time)
+        super
+
+        if pressed?
+          now = Time.monotonic
+
+          if last_click_time = @last_click_time
+            elapsed = now - last_click_time
+            @double_clicked = elapsed.total_milliseconds < DOUBLE_CLICK_MILLISECONDS
+          else
+            @double_clicked = false
+          end
+
+          @last_click_time = now
+        end
       end
 
       def update_cards_position
@@ -62,6 +85,11 @@ module Cards
         Stack.new(x: card.x, y: card.y, cards: @cards.delete_at(index..-1))
       end
 
+      def double_clicked?
+        return false unless pressed?
+        @double_clicked
+      end
+
       def add?(stack : Stack, _auto = false)
         return false if stack.empty? || !mouse_in?
         return true if empty?
@@ -73,7 +101,8 @@ module Cards
       end
 
       def flip_up_top_card?
-        return false if empty? || !mouse_in? || !Game::Mouse::Left.pressed?
+        return false if empty?
+        return false unless double_clicked?
 
         top = @cards.last
 

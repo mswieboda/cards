@@ -5,7 +5,6 @@ module Cards
     class Foundation < Waste
       getter suit : Suit
 
-      # @[JSON::Field(ignore: true)]
       @[JSON::Field(converter: Cards::Solitare::FoundationSpriteConverter)]
       @sprite : Game::Sprite
 
@@ -55,8 +54,8 @@ module Cards
         )
       end
 
-      def add?(stack : Stack, auto = false)
-        return false if stack.size != 1 || (!auto && !mouse_in?)
+      def add?(stack : Stack)
+        return false if stack.size != 1
 
         bottom = stack.cards.first
 
@@ -66,6 +65,15 @@ module Cards
         top = @cards.last
 
         bottom.rank.value == top.rank.value + 1
+      end
+
+      def add?(card : Card)
+        return false unless card.suit == suit
+        return card.rank.ace? if empty?
+
+        top = @cards.last
+
+        card.rank.value == top.rank.value + 1
       end
     end
 
